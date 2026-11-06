@@ -3467,45 +3467,62 @@
             initApp();
         }
     </script>
-<!-- نافذة تقرير ولي الأمر (محدثة لتكون شهادة رسمية وحساب النجوم من الأيام) -->
-<div id="externalReportModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+<!-- نافذة شهادة تقرير ولي الأمر الرسمية (A5 Landscape) -->
+<div id="parentCertModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <div class="bg-slate-800 border-2 border-emerald-400 rounded-3xl p-6 w-full max-w-lg shadow-2xl">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-black text-emerald-300">📋 تقرير ولي الأمر الفارس الذكي</h3>
-            <button type="button" onclick="closeExternalReportModal()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
+            <h3 class="text-xl font-black text-emerald-300">📜 شهادة متابعة ولي الأمر (A5 Landscape)</h3>
+            <button type="button" onclick="closeParentCertModal()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
         </div>
         
         <div class="mb-4">
             <label class="block text-slate-300 text-xs font-bold mb-2">اختر اسم الطالب:</label>
-            <select id="extReportStudentSelect" onchange="updateExtReportContent()" class="w-full bg-slate-900 border border-emerald-500/40 text-white font-bold px-3 py-2.5 rounded-xl focus:outline-none text-sm"></select>
+            <select id="parentCertStudentSelect" onchange="renderParentCertPreview()" class="w-full bg-slate-900 border border-emerald-500/40 text-white font-bold px-3 py-2.5 rounded-xl focus:outline-none text-sm"></select>
         </div>
 
         <div class="mb-4">
-            <label class="block text-slate-300 text-xs font-bold mb-2">معاينة التقرير (شهادة الأداء):</label>
-            <!-- textarea تكون readonly دائماً ولا يمكن التعديل عليها إلا في وضع المعلم -->
-            <textarea id="extReportText" rows="7" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-xs focus:outline-none leading-relaxed" readonly></textarea>
-            <p id="extReportModeNotice" class="text-[11px] text-amber-400 mt-1.5 font-bold"></p>
+            <label class="block text-slate-300 text-xs font-bold mb-2">معاينة نص الشهادة الرسمي:</label>
+            <textarea id="parentCertText" rows="5" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-xs focus:outline-none leading-relaxed" readonly></textarea>
+            <p class="text-[11px] text-amber-400 mt-1.5 font-bold">🔒 هذه الشهادة رسمية وغير قابلة للتعديل إلا في وضع المعلم.</p>
         </div>
 
         <div class="flex justify-end gap-2">
-            <button type="button" onclick="copyExtReportText()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-xl text-xs transition shadow">
-                📋 نسخ نص التقرير لـ واتساب
+            <button type="button" onclick="printParentCertificate()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-xl text-xs transition shadow flex items-center gap-1.5">
+                <span>🖨️</span> طباعة الشهادة (A5 أفقي)
             </button>
         </div>
     </div>
 </div>
 
+<style>
+    /* تخصيص طباعة شهادة ولي الأمر بحجم A5 أفقي (Landscape) */
+    @media print {
+        @page {
+            size: A5 landscape;
+            margin: 6mm;
+        }
+        body.printing-parent-cert #mainAppContainer,
+        body.printing-parent-cert #parentCertModal {
+            display: none !important;
+        }
+        body.printing-parent-cert #printableArea {
+            display: block !important;
+            width: 100% !important;
+            background: #ffffff !important;
+        }
+    }
+</style>
+
 <script>
-    // فتح نافذة تقرير ولي الأمر
-    function openExternalParentReportModal() {
-        const select = document.getElementById('extReportStudentSelect');
+    function openParentCertificateModal() {
+        const select = document.getElementById('parentCertStudentSelect');
         if (!select) return;
         const roster = typeof getRoster === 'function' ? getRoster() : [];
         select.innerHTML = '';
         
         if (roster.length === 0) {
             select.innerHTML = `<option value="">لا توجد أسماء طلاب في هذا الفصل</option>`;
-            document.getElementById('extReportText').value = "الرجاء اختيار فصل وإضافة طلاب أولاً.";
+            document.getElementById('parentCertText').value = "الرجاء اختيار فصل وإضافة طلاب أولاً.";
         } else {
             roster.forEach(name => {
                 const opt = document.createElement('option');
@@ -3513,52 +3530,84 @@
                 opt.textContent = name;
                 select.appendChild(opt);
             });
-            updateExtReportContent();
+            renderParentCertPreview();
         }
 
-        // تخصيص خانة التقرير إذا كان المعلم مسجلاً دخوله أم لا
-        const textElem = document.getElementById('extReportText');
-        const noticeElem = document.getElementById('extReportModeNotice');
+        const textElem = document.getElementById('parentCertText');
         if (isTeacherMode) {
             textElem.removeAttribute('readonly');
-            if(noticeElem) noticeElem.innerText = "💡 وضع المعلم مفعل: يمكنك تعديل النص إذا لزم الأمر قبل الإرسال.";
         } else {
             textElem.setAttribute('readonly', 'true');
-            if(noticeElem) noticeElem.innerText = "🔒 هذه الشهادة للمعاينة والنسخ فقط (غير قابلة للتعديل).";
         }
 
-        document.getElementById('externalReportModal').classList.remove('hidden');
-        document.getElementById('externalReportModal').classList.add('flex');
+        document.getElementById('parentCertModal').classList.remove('hidden');
+        document.getElementById('parentCertModal').classList.add('flex');
     }
 
-    function closeExternalReportModal() {
-        document.getElementById('externalReportModal').classList.remove('flex');
-        document.getElementById('externalReportModal').classList.add('hidden');
+    function closeParentCertModal() {
+        document.getElementById('parentCertModal').classList.remove('flex');
+        document.getElementById('parentCertModal').classList.add('hidden');
     }
 
-    // تحديث محتوى التقرير بناءً على حساب النجوم الفردية من صفحة الأيام والرتبة
-    function updateExtReportContent() {
-        const select = document.getElementById('extReportStudentSelect');
-        const textElem = document.getElementById('extReportText');
+    function renderParentCertPreview() {
+        const select = document.getElementById('parentCertStudentSelect');
+        const textElem = document.getElementById('parentCertText');
         if (!select || !textElem || !select.value) return;
 
         const studentName = select.value;
-        // حساب إجمالي النجوم من صفحة الأيام الفعلية عبر الدالةcalculateStudentTotalScore
         const totalStars = typeof calculateStudentTotalScore === 'function' ? calculateStudentTotalScore(studentName) : 0;
         const rank = typeof getStudentKnightRank === 'function' ? getStudentKnightRank(studentName) : { title: 'فارس الحرف', badge: '⚔️ فارس الحرف' };
         const group = typeof getStudentGroupName === 'function' ? getStudentGroupName(studentName) : 'مجموعته';
         const className = typeof currentClass !== 'undefined' ? currentClass.toUpperCase() : 'الثاني الإعدادي';
 
-        const msg = `تحية طيبة ولي الأمر الفاضل 🌹\n\nنحيطكم علماً بمستوى ابننا/ابنتنا المميز: *${studentName}* (فصل ${className})\n\n🛡️ الرتبة الحالية: ${rank.badge} (${rank.title})\n👥 المجموعة التعاونية: ${group}\n⭐ إجمالي النجوم المكتسبة (من سجل الأيام): (${totalStars} نجمة)\n\nنشكر لكم دعمكم المستمر ومتابعتكم الرائعة معنا في مادة اللغة العربية.\nمع أطيب تمنياتنا بدوام التميز والنجاح 🌟\nمعلم المادة: أ/ عبد الغني عاشور`;
+        const msg = `تحية طيبة ولي الأمر الفاضل 🌹\n\nنحيطكم علماً بمستوى ابننا/ابنتنا المميز: ${studentName} (فصل ${className})\n\n🛡️ الرتبة الحالية: ${rank.badge} (${rank.title})\n👥 المجموعة التعاونية: ${group}\n⭐ إجمالي النجوم المكتسبة (من سجل الأيام): (${totalStars} نجمة)\n\nنشكر لكم دعمكم المستمر ومتابعتكم الرائعة معنا في مادة اللغة العربية.\nمع أطيب تمنياتنا بدوام التميز والنجاح 🌟`;
 
         textElem.value = msg;
     }
 
-    function copyExtReportText() {
-        const textElem = document.getElementById('extReportText');
-        textElem.select();
-        document.execCommand('copy');
-        alert("تم نسخ نص التقرير بنجاح، يمكنك لصقه مباشرة في رسائل واتساب لولي الأمر!");
+    function printParentCertificate() {
+        const select = document.getElementById('parentCertStudentSelect');
+        if (!select || !select.value) return;
+        const studentName = select.value;
+        const customText = document.getElementById('parentCertText').value;
+        const header = typeof getHeaderData === 'function' ? getHeaderData() : { subject: "مادة اللغة العربية", teacher: "أ/ عبد الغني عاشور", year: "2026 / 2027" };
+        const rank = typeof getStudentKnightRank === 'function' ? getStudentKnightRank(studentName) : { title: 'فارس الحرف', badge: '⚔️ فارس الحرف' };
+        const todayStr = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        const printArea = document.getElementById('printableArea');
+        if (!printArea) return;
+
+        printArea.innerHTML = `
+            <div style="background: radial-gradient(circle at center, #fffdf9 0%, #f7efda 70%, #ede0c0 100%); color: #1e293b; border: 6px solid #78350f; padding: 16px; border-radius: 12px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">
+                <div style="border: 2px double #b45309; padding: 14px; position: relative; background: rgba(255, 253, 248, 0.95);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #d97706; padding-bottom: 8px; margin-bottom: 12px; font-size: 11px; font-weight: 800; color: #451a03;">
+                        <div>${header.subject}</div>
+                        <div style="background: #78350f; color: #fef3c7; padding: 2px 12px; border-radius: 999px;">${rank.badge}</div>
+                        <div>فصل (${currentClass.toUpperCase()})</div>
+                    </div>
+                    
+                    <h1 style="text-align: center; font-family: 'Aref Ruqaa', serif; font-size: 28px; color: #78350f; margin: 4px 0;">شهادة متابعة ولي الأمر</h1>
+                    
+                    <div style="text-align: center; margin: 10px auto; background: #fef3c7; border: 2px double #b45309; border-radius: 10px; padding: 6px 16px; max-width: 350px;">
+                        <span style="font-family: 'Aref Ruqaa', serif; font-size: 22px; font-weight: 700; color: #78350f;">${studentName}</span>
+                    </div>
+
+                    <p style="font-size: 13px; line-height: 1.7; color: #334155; white-space: pre-line; font-weight: 700; text-align: center; max-width: 500px; margin: 10px auto;">
+                        ${customText}
+                    </p>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 8px; border-top: 1px solid rgba(180,83,9,0.3); font-size: 11px; font-weight: 800;">
+                        <div>معلم المادة: ${header.teacher}</div>
+                        <div>تاريخ الإصدار: ${todayStr}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.classList.add('printing-parent-cert');
+        window.print();
+        document.body.classList.remove('printing-parent-cert');
+        closeParentCertModal();
     }
 </script>
 </body>
