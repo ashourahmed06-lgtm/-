@@ -845,7 +845,7 @@
         </div>
     </div>
 
-   <!-- Firebase SDK Imports & Realtime Listeners -->
+  <!-- Firebase SDK Imports & Realtime Listeners -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -886,39 +886,39 @@
             return null;
         };
 
-        // تفعيل الاستماع الفوري وتحديث الأجهزة الأخرى لحظياً (Realtime Listeners)
+        // تفعيل الاستماع الشامل واللحظي لجميع بيانات التطبيق (Realtime Listeners)
         function initRealtimeListeners() {
-            const keysToSync = [
-                'board_header_data', 'dice_questions',
-                `class_roster_jade`, `class_roster_crystal`, `class_roster_opal`,
-                `honor_students_jade`, `honor_students_crystal`, `honor_students_opal`
-            ];
-
-            keysToSync.forEach(key => {
-                const dbRef = ref(db, 'app_data/' + key);
-                onValue(dbRef, (snapshot) => {
-                    if (snapshot.exists()) {
-                        try {
-                            const cloudData = JSON.parse(snapshot.val());
-                            const str = JSON.stringify(cloudData);
-                            
-                            if (window.localStorage) window.localStorage.setItem(key, str);
-                            if (typeof memoryFallback !== 'undefined') {
-                                memoryFallback[key] = str;
+            const dbRef = ref(db, 'app_data');
+            
+            onValue(dbRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    try {
+                        const allData = snapshot.val();
+                        
+                        // تحديث التخزين المحلي لكل البيانات المتغيرة تلقائياً
+                        for (const key in allData) {
+                            if (Object.prototype.hasOwnProperty.call(allData, key)) {
+                                const rawVal = allData[key];
+                                if (window.localStorage) {
+                                    window.localStorage.setItem(key, typeof rawVal === 'string' ? rawVal : JSON.stringify(rawVal));
+                                }
+                                if (typeof memoryFallback !== 'undefined') {
+                                    memoryFallback[key] = typeof rawVal === 'string' ? rawVal : JSON.stringify(rawVal);
+                                }
                             }
-                            
-                            // تحديث الشاشة تلقائياً على الجهاز فور وصول التعديل
-                            if (typeof refreshCurrentView === 'function') {
-                                refreshCurrentView();
-                            }
-                            if (typeof renderHeader === 'function') {
-                                renderHeader();
-                            }
-                        } catch (e) {
-                            console.error("Error parsing realtime data for key:", key, e);
                         }
+                        
+                        // تحديث الشاشة فوراً عند وصول أي تعديل من أي جهاز
+                        if (typeof refreshCurrentView === 'function') {
+                            refreshCurrentView();
+                        }
+                        if (typeof renderHeader === 'function') {
+                            renderHeader();
+                        }
+                    } catch (e) {
+                        console.error("Error parsing realtime data:", e);
                     }
-                });
+                }
             });
         }
 
