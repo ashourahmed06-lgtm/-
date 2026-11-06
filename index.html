@@ -845,7 +845,7 @@
         </div>
     </div>
 
-  <!-- Firebase SDK Imports & Realtime Listeners -->
+  <!-- Firebase SDK Imports & Realtime Listeners (Fixed) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -853,6 +853,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyAHbCkb61MrSSIl0EjnX2r76t4xJd1cKe0",
             authDomain: "honorboard-arabic.firebaseapp.com",
+            databaseURL: "https://honorboard-arabic-default-rtdb.firebaseio.com", // تأكدنا من ربط الداتابيز برابطها الصحيح
             projectId: "honorboard-arabic",
             storageBucket: "honorboard-arabic.firebasestorage.app",
             messagingSenderId: "578585646571",
@@ -863,11 +864,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // ربط دالة الحفظ السحابي
+        // تعديل الحفظ السحابي ليحفظ البيانات ككائنات حقيقية مباشرة
         window.cloudSave = async function(key, val) {
             try {
                 const dbRef = ref(db, 'app_data/' + key);
-                await set(dbRef, JSON.stringify(val));
+                await set(dbRef, val); // حفظ الكائن مباشرة بدون تحويله إلى String
             } catch (err) {
                 console.error("Firebase save error:", err);
             }
@@ -875,10 +876,10 @@
 
         window.cloudGet = async function(key) {
             try {
-                const dbRef = ref(db);
-                const snapshot = await get(child(dbRef, 'app_data/' + key));
+                const dbRef = ref(db, 'app_data/' + key);
+                const snapshot = await get(dbRef);
                 if (snapshot.exists()) {
-                    return JSON.parse(snapshot.val());
+                    return snapshot.val();
                 }
             } catch (err) {
                 console.error("Firebase get error:", err);
@@ -886,7 +887,7 @@
             return null;
         };
 
-        // تفعيل الاستماع الشامل واللحظي لجميع بيانات التطبيق (Realtime Listeners)
+        // الاستماع الفوري وتحديث التخزين المحلي والواجهة لحظياً
         function initRealtimeListeners() {
             const dbRef = ref(db, 'app_data');
             
@@ -895,20 +896,21 @@
                     try {
                         const allData = snapshot.val();
                         
-                        // تحديث التخزين المحلي لكل البيانات المتغيرة تلقائياً
                         for (const key in allData) {
                             if (Object.prototype.hasOwnProperty.call(allData, key)) {
-                                const rawVal = allData[key];
+                                const val = allData[key];
+                                const str = typeof val === 'string' ? val : JSON.stringify(val);
+                                
                                 if (window.localStorage) {
-                                    window.localStorage.setItem(key, typeof rawVal === 'string' ? rawVal : JSON.stringify(rawVal));
+                                    window.localStorage.setItem(key, str);
                                 }
                                 if (typeof memoryFallback !== 'undefined') {
-                                    memoryFallback[key] = typeof rawVal === 'string' ? rawVal : JSON.stringify(rawVal);
+                                    memoryFallback[key] = str;
                                 }
                             }
                         }
                         
-                        // تحديث الشاشة فوراً عند وصول أي تعديل من أي جهاز
+                        // إعادة تحديث الواجهة فوراً لتظهر الألوان والنجوم والأسماء المحدثة
                         if (typeof refreshCurrentView === 'function') {
                             refreshCurrentView();
                         }
@@ -922,7 +924,6 @@
             });
         }
 
-        // تشغيل الاستماع المباشر فور تحميل الصفحة
         initRealtimeListeners();
     </script>
 
