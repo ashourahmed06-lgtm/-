@@ -225,29 +225,34 @@
     <button type="button" onclick="exportToGoogleClassroomExcel()" id="classroomExportBtn" class="hidden bg-sky-700 hover:bg-sky-600 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm items-center gap-1.5">
         <span>🎓 تصدير لجوجل كلاس روم</span>
     </button>
+    
     <button type="button" onclick="exportBackup()" id="exportBtn" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm items-center gap-1.5">
         <span>💾 تصدير نسخة</span>
     </button>
+    
     <label id="importBtnLabel" class="hidden bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm items-center gap-1.5 cursor-pointer">
         <span>📂 استعادة نسخة</span>
         <input type="file" accept=".json" onchange="importBackup(event)" class="hidden">
     </label>
+    
     <button type="button" onclick="openRosterModal()" id="rosterBtn" class="hidden bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm items-center gap-1.5">
         <span>👥 إدارة الفصل</span>
     </button>
+    
     <button type="button" onclick="openHeaderModal()" id="settingsHeaderBtn" class="hidden bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm items-center gap-1.5">
         <span>⚙️ إعدادات اللوحة</span>
     </button>
+    
     <button type="button" onclick="resetCorruptedStorage()" id="resetStorageBtn" class="hidden bg-rose-700 hover:bg-rose-600 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-xs items-center gap-1" title="إعادة ضبط مصنع للبيانات في حال تلفها">
         <span>🛠️ تصفير البيانات</span>
     </button>
     
-    <!-- زر تقرير ولي الأمر القديم المحدث -->
-<button type="button" onclick="openParentCertificateModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm flex items-center gap-1.5">
-    <span>📱</span> تقرير ولي الأمر
-</button>
+    <!-- زر تقرير ولي الأمر (يفتح الشهادة A5) -->
+    <button type="button" onclick="openParentCertificateModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm flex items-center gap-1.5">
+        <span>📱</span> تقرير ولي الأمر
+    </button>
     
-    <!-- زر حفظ الصفحة كـ PDF (مرة واحدة فقط) -->
+    <!-- زر حفظ الصفحة كـ PDF -->
     <button type="button" onclick="exportPageAsPDF()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm flex items-center gap-1.5">
         <span>📄</span> حفظ PDF
     </button>
@@ -3471,7 +3476,7 @@
 <div id="parentCertModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <div class="bg-slate-800 border-2 border-emerald-400 rounded-3xl p-6 w-full max-w-lg shadow-2xl">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-black text-emerald-300">📜 شهادة متابعة ولي الأمر (A5 Landscape)</h3>
+            <h3 class="text-xl font-black text-emerald-300">📜 شهادة متابعة ولي الأمر</h3>
             <button type="button" onclick="closeParentCertModal()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
         </div>
         
@@ -3483,7 +3488,7 @@
         <div class="mb-4">
             <label class="block text-slate-300 text-xs font-bold mb-2">معاينة نص الشهادة الرسمي:</label>
             <textarea id="parentCertText" rows="5" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-xs focus:outline-none leading-relaxed" readonly></textarea>
-            <p class="text-[11px] text-amber-400 mt-1.5 font-bold">🔒 هذه الشهادة رسمية وغير قابلة للتعديل إلا في وضع المعلم.</p>
+            <p class="text-[11px] text-amber-400 mt-1.5 font-bold">🔒 الشهادة غير قابلة للتعديل إلا في وضع المعلم.</p>
         </div>
 
         <div class="flex justify-end gap-2">
@@ -3495,21 +3500,11 @@
 </div>
 
 <style>
-    /* تخصيص طباعة شهادة ولي الأمر بحجم A5 أفقي (Landscape) */
     @media print {
-        @page {
-            size: A5 landscape;
-            margin: 6mm;
-        }
+        @page { size: A5 landscape; margin: 6mm; }
         body.printing-parent-cert #mainAppContainer,
-        body.printing-parent-cert #parentCertModal {
-            display: none !important;
-        }
-        body.printing-parent-cert #printableArea {
-            display: block !important;
-            width: 100% !important;
-            background: #ffffff !important;
-        }
+        body.printing-parent-cert #parentCertModal { display: none !important; }
+        body.printing-parent-cert #printableArea { display: block !important; width: 100% !important; background: #ffffff !important; }
     }
 </style>
 
@@ -3534,7 +3529,7 @@
         }
 
         const textElem = document.getElementById('parentCertText');
-        if (isTeacherMode) {
+        if (typeof isTeacherMode !== 'undefined' && isTeacherMode) {
             textElem.removeAttribute('readonly');
         } else {
             textElem.setAttribute('readonly', 'true');
