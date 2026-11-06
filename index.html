@@ -244,6 +244,14 @@
                     <button type="button" onclick="toggleTeacherMode()" id="teacherBtn" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-1.5 rounded-xl shadow transition text-sm flex items-center gap-1.5">
                         <span>🔒 وضع المعلم</span>
                     </button>
+                        <!-- زر تقرير ولي الأمر الخارجي السريع -->
+                    <button type="button" onclick="openExternalParentReportModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm flex items-center gap-1.5">
+                        <span>📱</span> تقرير ولي الأمر
+                    </button>
+                        <!-- زر حفظ الصفحة كـ PDF -->
+                    <button type="button" onclick="exportPageAsPDF()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm flex items-center gap-1.5">
+                        <span>📄</span> حفظ PDF
+                    </button>
                 </div>
             </div>
 
@@ -3455,5 +3463,99 @@
             initApp();
         }
     </script>
+<!-- نافذة تقرير ولي الأمر -->
+<div id="externalReportModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border-2 border-emerald-400 rounded-3xl p-6 w-full max-w-md shadow-2xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-black text-emerald-300">📋 إعداد تقرير ولي الأمر</h3>
+            <button type="button" onclick="closeExternalReportModal()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-slate-300 text-xs font-bold mb-2">اختر اسم الطالب:</label>
+            <select id="extReportStudentSelect" class="w-full bg-slate-900 border border-emerald-500/40 text-white font-bold px-3 py-2.5 rounded-xl focus:outline-none text-sm"></select>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-slate-300 text-xs font-bold mb-2">نص تقرير الواتساب الجاهز:</label>
+            <textarea id="extReportText" rows="6" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-xs focus:outline-none" readonly></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2">
+            <button type="button" onclick="generateExtReportText()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-4 py-2 rounded-xl text-xs transition">
+                🔄 تحديث النص
+            </button>
+            <button type="button" onclick="copyExtReportText()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-xl text-xs transition">
+                📋 نسخ لولي الأمر
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // وظيفة حفظ الـ PDF
+    function exportPageAsPDF() {
+        window.print();
+    }
+
+    // وظائف تقرير ولي الأمر
+    function openExternalParentReportModal() {
+        const select = document.getElementById('extReportStudentSelect');
+        if (!select) return;
+        const roster = typeof getRoster === 'function' ? getRoster() : [];
+        select.innerHTML = '';
+        
+        if (roster.length === 0) {
+            select.innerHTML = `<option value="">لا توجد أسماء طلاب في هذا الفصل</option>`;
+            document.getElementById('extReportText').value = "الرجاء اختيار فصل وإضافة طلاب أولاً.";
+        } else {
+            roster.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                select.appendChild(opt);
+            });
+            select.onchange = updateExtReportContent;
+            updateExtReportContent();
+        }
+
+        document.getElementById('externalReportModal').classList.remove('hidden');
+        document.getElementById('externalReportModal').classList.add('flex');
+    }
+
+    function closeExternalReportModal() {
+        document.getElementById('externalReportModal').classList.remove('flex');
+        document.getElementById('externalReportModal').classList.add('hidden');
+    }
+
+    function updateExtReportContent() {
+        const select = document.getElementById('extReportStudentSelect');
+        const textElem = document.getElementById('extReportText');
+        if (!select || !textElem || !select.value) return;
+
+        const studentName = select.value;
+        const weekId = typeof currentWeek !== 'undefined' ? currentWeek : 'week1';
+        const weekPts = typeof getStudentWeekPoints === 'function' ? getStudentWeekPoints(studentName, weekId) : 0;
+        const rank = typeof getStudentKnightRank === 'function' ? getStudentKnightRank(studentName) : { title: 'فارس الحرف', badge: '⚔️ فارس الحرف' };
+        const group = typeof getStudentGroupName === 'function' ? getStudentGroupName(studentName) : 'مجموعته';
+        const className = typeof currentClass !== 'undefined' ? currentClass.toUpperCase() : 'الثاني الإعدادي';
+
+        const msg = `تحية طيبة ولي الأمر الفاضل 🌹\n\nنحيطكم علماً بمستوى ابننا/ابنتنا المميز: *${studentName}* (فصل ${className})\n\n🛡️ الرتبة الحالية: ${rank.badge}\n👥 المجموعة التعاونية: ${group}\n⭐ حصاد الأسبوع: اكتمل بنجاح (${weekPts} / 5 أيام)\n\nنشكر لكم دعمكم المستمر ومتابعتكم الرائعة معنا في مادة اللغة العربية.\nمع أطيب تمنياتنا بدوام التميز والنجاح 🌟\nمعلم المادة: أ/ عبد الغني عاشور`;
+
+        textElem.value = msg;
+    }
+
+    function generateExtReportText() {
+        updateExtReportContent();
+        alert("تم تحديث بيانات التقرير بنجاح!");
+    }
+
+    function copyExtReportText() {
+        const textElem = document.getElementById('extReportText');
+        textElem.select();
+        document.execCommand('copy');
+        alert("تم نسخ نص تقرير واتساب بنجاح، يمكنك إرساله لولي الأمر مباشرة!");
+    }
+</script>
 </body>
 </html>
