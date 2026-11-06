@@ -241,6 +241,14 @@
                     <button type="button" onclick="resetCorruptedStorage()" id="resetStorageBtn" class="hidden bg-rose-700 hover:bg-rose-600 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-xs items-center gap-1" title="إعادة ضبط مصنع للبيانات في حال تلفها">
                         <span>🛠️ تصفير البيانات</span>
                     </button>
+                        <!-- زر تقرير ولي الأمر الخارجي السريع -->
+                    <button type="button" onclick="openExternalParentReportModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm flex items-center gap-1.5">
+                        <span>📱</span> تقرير ولي الأمر
+                    </button>
+                        <!-- زر حفظ الصفحة كـ PDF -->
+                    <button type="button" onclick="exportPageAsPDF()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm flex items-center gap-1.5">
+                        <span>📄</span> حفظ PDF
+                    </button>
                     <button type="button" onclick="toggleTeacherMode()" id="teacherBtn" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-1.5 rounded-xl shadow transition text-sm flex items-center gap-1.5">
                         <span>🔒 وضع المعلم</span>
                     </button>
