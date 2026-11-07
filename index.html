@@ -3507,7 +3507,78 @@
         body.printing-parent-cert #printableArea { display: block !important; width: 100% !important; background: #ffffff !important; }
     }
 </style>
+// === نظام عرض أوائل الفصل تلقائياً عند الدخول ===
+    function showWelcomeTopStudents() {
+        const roster = typeof getRoster === 'function' ? getRoster() : [];
+        if (roster.length === 0) return; // لا تعرض شيئاً إذا كان الفصل فارغاً
 
+        // تجميع بيانات الطلاب وحساب نجومهم
+        let studentsData = roster.map(name => {
+            return {
+                name: name,
+                score: typeof calculateStudentTotalScore === 'function' ? calculateStudentTotalScore(name) : 0,
+                rank: typeof getStudentKnightRank === 'function' ? getStudentKnightRank(name) : { badge: 'فارس' }
+            };
+        });
+
+        // ترتيب الطلاب تنازلياً حسب النجوم
+        studentsData.sort((a, b) => b.score - a.score);
+        
+        // استخراج أول 3 طلاب فقط (بشرط أن يكون لديهم نجوم أكبر من صفر)
+        const top3 = studentsData.slice(0, 3).filter(s => s.score > 0);
+        if (top3.length === 0) return; 
+
+        const podiumContainer = document.getElementById('podiumContainer');
+        podiumContainer.innerHTML = '';
+
+        // دوال مساعدة لبناء كارت التتويج
+        const buildPodiumCard = (student, placeNum, colors, heightClass, icon) => `
+            <div class="flex flex-col items-center order-${placeNum === 1 ? '1 md:order-2' : (placeNum === 2 ? '2 md:order-1' : '3 md:order-3')} transform ${placeNum === 1 ? 'scale-110 z-10' : 'scale-95'} transition duration-500 hover:scale-110">
+                <div class="text-4xl mb-2">${icon}</div>
+                <div class="${colors.bg} ${colors.border} border-2 rounded-2xl p-4 shadow-2xl flex flex-col items-center justify-center w-40 sm:w-48 ${heightClass}">
+                    <h3 class="text-white font-black text-lg text-center mb-1 leading-tight">${student.name}</h3>
+                    <div class="text-[10px] font-bold ${colors.text} mb-3 text-center">${student.rank.badge}</div>
+                    <div class="bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700/50">
+                        <span class="font-black text-xl text-white">${student.score}</span>
+                        <span class="text-xs ${colors.text}">نجمة</span>
+                    </div>
+                </div>
+                <div class="mt-3 font-black ${colors.text} text-xl drop-shadow-md">${placeNum === 1 ? 'المركز الأول' : (placeNum === 2 ? 'المركز الثاني' : 'المركز الثالث')}</div>
+            </div>
+        `;
+
+        // ترتيب العرض في المنصة (الثاني يميناً، الأول في المنتصف، الثالث يساراً)
+        if (top3[1]) podiumContainer.innerHTML += buildPodiumCard(top3[1], 2, {bg: 'bg-slate-400/20', border: 'border-slate-300', text: 'text-slate-300'}, 'h-40', '🥈');
+        if (top3[0]) podiumContainer.innerHTML += buildPodiumCard(top3[0], 1, {bg: 'bg-amber-500/20', border: 'border-amber-400', text: 'text-amber-400'}, 'h-48', '👑');
+        if (top3[2]) podiumContainer.innerHTML += buildPodiumCard(top3[2], 3, {bg: 'bg-orange-600/20', border: 'border-orange-500', text: 'text-orange-400'}, 'h-36', '🥉');
+
+        // إظهار النافذة
+        document.getElementById('welcomeTopStudentsModal').classList.remove('hidden');
+        document.getElementById('welcomeTopStudentsModal').classList.add('flex');
+
+        // إطلاق المفرقعات الاحتفالية 
+        setTimeout(() => {
+            triggerConfetti({ particleCount: 150, spread: 100, origin: { y: 0.3 }, colors: ['#fbbf24', '#f59e0b', '#d97706'] });
+        }, 300);
+    }
+
+    function closeWelcomeModal() {
+        document.getElementById('welcomeTopStudentsModal').classList.remove('flex');
+        document.getElementById('welcomeTopStudentsModal').classList.add('hidden');
+    }
+
+    // تعديل دالة initApp لتشغيل نافذة التتويج تلقائياً عند فتح الموقع فقط (وليس كل تحديث)
+    const originalInitApp = initApp;
+    initApp = function() {
+        originalInitApp();
+        // إظهار الأوائل بعد ثانية واحدة من تحميل البيانات
+        if (!sessionStorage.getItem('welcome_shown')) {
+            setTimeout(() => {
+                showWelcomeTopStudents();
+                sessionStorage.setItem('welcome_shown', 'true');
+            }, 1500);
+        }
+    };
 <script>
     function openParentCertificateModal() {
         const select = document.getElementById('parentCertStudentSelect');
@@ -3605,5 +3676,96 @@
         closeParentCertModal();
     }
 </script>
+
+<!-- نافذة الترحيب بمنصة تتويج الأوائل -->
+<div id="welcomeTopStudentsModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-[100]">
+    <div class="bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 md:p-10 w-full max-w-4xl shadow-2xl text-center relative overflow-hidden">
+        
+        <!-- تأثيرات بصرية للخلفية -->
+        <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/20 via-slate-900/5 to-transparent pointer-events-none"></div>
+
+        <h2 class="text-3xl md:text-5xl font-black gold-text mb-2 relative z-10">🏆 لوحة الشرف الملكية 🏆</h2>
+        <p class="text-amber-200/80 text-sm md:text-base font-bold mb-8 relative z-10">فرسان الصدارة والأعلى حصولاً على النجوم في فصل <span class="currentClassNameDisplay text-amber-400"></span></p>
+
+        <!-- منصة التتويج (Podium) -->
+        <div id="podiumContainer" class="flex flex-col md:flex-row justify-center items-end gap-4 md:gap-6 mb-10 relative z-10 min-h-[250px]">
+            <!-- سيتم حقن الأوائل الثلاثة هنا برمجياً -->
+        </div>
+
+        <button type="button" onclick="closeWelcomeModal()" class="relative z-10 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-900 font-black text-lg px-10 py-3 rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.4)] transition transform hover:scale-105">
+            ✨ الدخول إلى لوحة الفصل ✨
+        </button>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // دوال منصة التتويج (Top 3 Podium)
+    // ==========================================
+    function showWelcomeTopStudents() {
+        const roster = typeof getRoster === 'function' ? getRoster() : [];
+        if (roster.length === 0) return;
+
+        let studentsData = roster.map(name => {
+            return {
+                name: name,
+                score: typeof calculateStudentTotalScore === 'function' ? calculateStudentTotalScore(name) : 0,
+                rank: typeof getStudentKnightRank === 'function' ? getStudentKnightRank(name) : { badge: 'فارس' }
+            };
+        });
+
+        studentsData.sort((a, b) => b.score - a.score);
+        
+        const top3 = studentsData.slice(0, 3).filter(s => s.score > 0);
+        if (top3.length === 0) return; 
+
+        const podiumContainer = document.getElementById('podiumContainer');
+        podiumContainer.innerHTML = '';
+
+        const buildPodiumCard = (student, placeNum, colors, heightClass, icon) => `
+            <div class="flex flex-col items-center order-${placeNum === 1 ? '1 md:order-2' : (placeNum === 2 ? '2 md:order-1' : '3 md:order-3')} transform ${placeNum === 1 ? 'scale-110 z-10' : 'scale-95'} transition duration-500 hover:scale-110">
+                <div class="text-4xl mb-2">${icon}</div>
+                <div class="${colors.bg} ${colors.border} border-2 rounded-2xl p-4 shadow-2xl flex flex-col items-center justify-center w-40 sm:w-48 ${heightClass}">
+                    <h3 class="text-white font-black text-lg text-center mb-1 leading-tight">${student.name}</h3>
+                    <div class="text-[10px] font-bold ${colors.text} mb-3 text-center">${student.rank.badge}</div>
+                    <div class="bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700/50">
+                        <span class="font-black text-xl text-white">${student.score}</span>
+                        <span class="text-xs ${colors.text}">نجمة</span>
+                    </div>
+                </div>
+                <div class="mt-3 font-black ${colors.text} text-xl drop-shadow-md">${placeNum === 1 ? 'المركز الأول' : (placeNum === 2 ? 'المركز الثاني' : 'المركز الثالث')}</div>
+            </div>
+        `;
+
+        if (top3[1]) podiumContainer.innerHTML += buildPodiumCard(top3[1], 2, {bg: 'bg-slate-400/20', border: 'border-slate-300', text: 'text-slate-300'}, 'h-40', '🥈');
+        if (top3[0]) podiumContainer.innerHTML += buildPodiumCard(top3[0], 1, {bg: 'bg-amber-500/20', border: 'border-amber-400', text: 'text-amber-400'}, 'h-48', '👑');
+        if (top3[2]) podiumContainer.innerHTML += buildPodiumCard(top3[2], 3, {bg: 'bg-orange-600/20', border: 'border-orange-500', text: 'text-orange-400'}, 'h-36', '🥉');
+
+        document.getElementById('welcomeTopStudentsModal').classList.remove('hidden');
+        document.getElementById('welcomeTopStudentsModal').classList.add('flex');
+
+        setTimeout(() => {
+            triggerConfetti({ particleCount: 150, spread: 100, origin: { y: 0.3 }, colors: ['#fbbf24', '#f59e0b', '#d97706'] });
+        }, 300);
+    }
+
+    function closeWelcomeModal() {
+        document.getElementById('welcomeTopStudentsModal').classList.remove('flex');
+        document.getElementById('welcomeTopStudentsModal').classList.add('hidden');
+    }
+
+    // تشغيل نافذة التتويج تلقائياً عند فتح الموقع لأول مرة
+    if (typeof initApp !== 'undefined') {
+        const originalInitApp = initApp;
+        initApp = function() {
+            originalInitApp();
+            if (!sessionStorage.getItem('welcome_shown')) {
+                setTimeout(() => {
+                    showWelcomeTopStudents();
+                    sessionStorage.setItem('welcome_shown', 'true');
+                }, 1500);
+            }
+        };
+    }
 </body>
 </html>
