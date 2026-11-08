@@ -1255,14 +1255,11 @@
         function getGroupStars(weekId, dayId) {
             const stars = safeGet(`groups_stars_${currentClass}_${weekId}_${dayId}`, {}, 'object');
             const groups = getGroups();
-            let updated = false;
             groups.forEach(g => {
                 if (!stars[g.id] || typeof stars[g.id] !== 'object') {
                     stars[g.id] = { p1: false, p2: false, p3: false, p4: false, p5: false };
-                    updated = true;
                 }
             });
-            if (updated) safeSet(`groups_stars_${currentClass}_${weekId}_${dayId}`, stars);
             return stars;
         }
 
@@ -2192,14 +2189,36 @@
             renderGroupsView();
         }
 
-        // --- 5. Backup Export & Import ---
+        // --- 5. Backup Export & Import (Fixed) ---
+        const VALID_APP_KEY_PREFIXES = [
+            'board_header_data',
+            'dice_questions',
+            'class_roster_',
+            'honor_students_',
+            'weeks_list_',
+            'weekly_tracker_',
+            'daily_tracker_',
+            'monthly_data_',
+            'term_data_',
+            'class_groups_',
+            'groups_stars_',
+            'seating_order_'
+        ];
+
+        function isAppStorageKey(key) {
+            return Boolean(key && VALID_APP_KEY_PREFIXES.some(prefix => key.startsWith(prefix)));
+        }
+
         function exportBackup() {
             const data = {};
             try {
                 if (window.localStorage) {
                     for (let i = 0; i < localStorage.length; i++) {
                         const key = localStorage.key(i);
-                        data[key] = localStorage.getItem(key);
+                        // تصدير مفاتيح التطبيق فقط وتجاهل أي مفاتيح غريبة في المتصفح
+                        if (isAppStorageKey(key)) {
+                            data[key] = localStorage.getItem(key);
+                        }
                     }
                 }
             } catch (e) {}
@@ -2207,45 +2226,53 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `honor_board_backup_${currentClass}_${new Date().toISOString().slice(0,10)}.json`;
+            a.download = `honor_board_full_backup_${new Date().toISOString().slice(0,10)}.json`;
             a.click();
             URL.revokeObjectURL(url);
         }
 
-       function importBackup(e) {
+        function importBackup(e) {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = async function(event) {
                 try {
                     const data = JSON.parse(event.target.result);
-                    if (confirm("هل أنت متأكد من استعادة هذه النسخة الاحتياطية؟ سيتم دمج وتحديث البيانات الحالية.")) {
+                    if (!data || typeof data !== 'object') {
+                        throw new Error("Invalid format");
+                    }
+
+                    if (confirm("هل أنت متأكد من استعادة هذه النسخة الاحتياطية؟ سيتم تحديث البيانات الحالية ومزامنتها مع السحابة.")) {
+                        // تفعيل قفل الحفظ السحابي لضمان السماح برفع النسخة المستعادة
+                        window.isCloudReady = true;
+
                         for (const key in data) {
-                            if (Object.prototype.hasOwnProperty.call(data, key)) {
+                            if (Object.prototype.hasOwnProperty.call(data, key) && isAppStorageKey(key)) {
                                 const val = data[key];
+                                const strVal = typeof val === 'string' ? val : JSON.stringify(val);
+
                                 if (window.localStorage) {
-                                    window.localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+                                    window.localStorage.setItem(key, strVal);
                                 }
                                 if (typeof memoryFallback !== 'undefined') {
-                                    memoryFallback[key] = typeof val === 'string' ? val : JSON.stringify(val);
+                                    memoryFallback[key] = strVal;
                                 }
-                                
                                 if (typeof window.cloudSave === 'function') {
-                                    try {
-                                        const parsedVal = typeof val === 'string' ? JSON.parse(val) : val;
-                                        await window.cloudSave(key, parsedVal);
-                                    } catch (err) {
-                                        await window.cloudSave(key, val);
-                                    }
+                                    // إرسال القيمة النصية مباشرة دون فكها لتجنب أخطاء رموز Firebase
+                                    await window.cloudSave(key, strVal);
                                 }
                             }
                         }
-                        alert("تمت استعادة النسخة الاحتياطية ومزامنتها بنجاح!");
+
+                        alert("تمت استعادة النسخة الاحتياطية ومزامنتها مع السحابة بنجاح!");
                         location.reload();
                     }
                 } catch (err) {
                     alert("ملف النسخة الاحتياطية غير صالح أو تالف!");
                     console.error("Import error:", err);
+                } finally {
+                    // تفريغ حقل الملف للسماح باختيار نفس الملف مرة أخرى عند الحاجة
+                    e.target.value = '';
                 }
             };
             reader.readAsText(file);
@@ -3464,7 +3491,6 @@
             renderSummarySelect();
             renderCertificateStudentSelect();
             updateTeacherUI();
-            initCloudSync(); // بدء جامعة المزامنة السحابية
         }
 
         if (document.readyState === 'loading') {
@@ -3699,14 +3725,7 @@
     }
 
     // تشغيل نافذة التتويج تلقائياً بعد تحميل الصفحة ومزامنة البيانات مباشرة
-    window.addEventListener('load', () => {
-        if (!sessionStorage.getItem('welcome_shown')) {
-            setTimeout(() => {
-                showWelcomeTopStudents();
-                sessionStorage.setItem('welcome_shown', 'true');
-            }, 1200);
-        }
-    });
+
 </script>
 </body>
 </html>
