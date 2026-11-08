@@ -246,7 +246,10 @@
     <button type="button" onclick="resetCorruptedStorage()" id="resetStorageBtn" class="hidden bg-rose-700 hover:bg-rose-600 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-xs items-center gap-1" title="إعادة ضبط مصنع للبيانات في حال تلفها">
         <span>🛠️ تصفير البيانات</span>
     </button>
-    
+    <!-- زر منصة تتويج الأوائل (أعلى 3 طلاب) -->
+    <button type="button" onclick="showWelcomeTopStudents()" class="bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-600 hover:from-amber-300 hover:to-yellow-500 text-slate-950 font-black px-4 py-1.5 rounded-xl shadow-[0_0_15px_rgba(251,191,36,0.5)] border border-amber-200 transition transform hover:scale-105 text-sm flex items-center gap-1.5">
+        <span class="text-base">👑</span> أوائل الفصل
+    </button>
     <!-- زر تقرير ولي الأمر (يفتح الشهادة A5) -->
     <button type="button" onclick="openParentCertificateModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm flex items-center gap-1.5">
         <span>📱</span> تقرير ولي الأمر
@@ -3446,6 +3449,45 @@
             document.getElementById('addModal').classList.add('hidden');
         }
 
+        // دالة منح 3 نجوم مكافأة في المتابعة اليومية عند تكريم الطالب
+        function awardHonorBonusStars(studentName, starsToAdd = 3) {
+            let remaining = starsToAdd;
+            const allDays = ['sun', 'mon', 'tue', 'wed', 'thu'];
+            // البدء باليوم المحدد حالياً، وإذا اكتملت نجومه الخمس تضاف البقية لليوم التالي حتى لا تضيع أي نجمة
+            const orderedDays = [currentDailyDay, ...allDays.filter(d => d !== currentDailyDay)];
+            const pointKeys = ['p1', 'p2', 'p3', 'p4', 'p5'];
+            const weeklyTracker = getWeeklyTracker(currentWeek);
+
+            for (const dayId of orderedDays) {
+                if (remaining <= 0) break;
+                const dailyTracker = getDailyTracker(currentWeek, dayId);
+                if (!dailyTracker[studentName]) {
+                    dailyTracker[studentName] = { p1: false, p2: false, p3: false, p4: false, p5: false };
+                }
+
+                let dayChanged = false;
+                for (const key of pointKeys) {
+                    if (!dailyTracker[studentName][key] && remaining > 0) {
+                        dailyTracker[studentName][key] = true;
+                        remaining--;
+                        dayChanged = true;
+                    }
+                }
+
+                if (dayChanged) {
+                    saveDailyTracker(currentWeek, dayId, dailyTracker);
+                    const st = dailyTracker[studentName];
+                    const sum = (st.p1 ? 1 : 0) + (st.p2 ? 1 : 0) + (st.p3 ? 1 : 0) + (st.p4 ? 1 : 0) + (st.p5 ? 1 : 0);
+                    if (!weeklyTracker[studentName]) {
+                        weeklyTracker[studentName] = { sun: false, mon: false, tue: false, wed: false, thu: false, prize: "" };
+                    }
+                    weeklyTracker[studentName][dayId] = (sum === 5);
+                }
+            }
+
+            saveWeeklyTracker(currentWeek, weeklyTracker);
+        }
+
         function saveHonorStudent(e) {
             e.preventDefault();
             const name = document.getElementById('studentNameSelect').value;
@@ -3462,6 +3504,10 @@
                 }
             } else {
                 students.push({ id: Date.now(), name, category, photo, reason });
+                // إضافة 3 نجوم تلقائياً في المتابعة اليومية عند تكريم الطالب في أي من الفئات الأربع
+                if (['excellence', 'ethics', 'activities', 'perseverance'].includes(category)) {
+                    awardHonorBonusStars(name, 3);
+                }
                 triggerConfetti();
             }
 
@@ -3469,7 +3515,6 @@
             closeAddModal();
             renderStudents();
         }
-
         function deleteHonorStudent(id) {
             if (!requireTeacherOrPrompt()) return;
             if (confirm("هل أنت متأكد من حذف هذا التكريم؟")) {
