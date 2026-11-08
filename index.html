@@ -862,15 +862,15 @@
         </div>
     </div>
 
-  <!-- Firebase SDK Imports & Realtime Listeners (Fixed) -->
+  <!-- Firebase SDK Imports & Realtime Listeners (Fixed & Protected) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAHbCkb61MrSSIl0EjnX2r76t4xJd1cKe0",
             authDomain: "honorboard-arabic.firebaseapp.com",
-            databaseURL: "https://honorboard-arabic-default-rtdb.firebaseio.com", // تأكدنا من ربط الداتابيز برابطها الصحيح
+            databaseURL: "https://honorboard-arabic-default-rtdb.firebaseio.com",
             projectId: "honorboard-arabic",
             storageBucket: "honorboard-arabic.firebasestorage.app",
             messagingSenderId: "578585646571",
@@ -881,30 +881,20 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // تعديل الحفظ السحابي ليحفظ البيانات ككائنات حقيقية مباشرة
+        // قفل أمان يمنع أي جهاز جديد من الكتابة فوق السحابة قبل تحميل البيانات منها أولاً
+        window.isCloudReady = false;
+
         window.cloudSave = async function(key, val) {
+            if (!window.isCloudReady) return; // منع الكتابة العكسية أثناء التحميل الأولي
             try {
                 const dbRef = ref(db, 'app_data/' + key);
-                await set(dbRef, val); // حفظ الكائن مباشرة بدون تحويله إلى String
+                const strVal = typeof val === 'string' ? val : JSON.stringify(val);
+                await set(dbRef, strVal);
             } catch (err) {
                 console.error("Firebase save error:", err);
             }
         };
 
-        window.cloudGet = async function(key) {
-            try {
-                const dbRef = ref(db, 'app_data/' + key);
-                const snapshot = await get(dbRef);
-                if (snapshot.exists()) {
-                    return snapshot.val();
-                }
-            } catch (err) {
-                console.error("Firebase get error:", err);
-            }
-            return null;
-        };
-
-        // الاستماع الفوري وتحديث التخزين المحلي والواجهة لحظياً
         function initRealtimeListeners() {
             const dbRef = ref(db, 'app_data');
             
@@ -912,12 +902,10 @@
                 if (snapshot.exists()) {
                     try {
                         const allData = snapshot.val();
-                        
                         for (const key in allData) {
                             if (Object.prototype.hasOwnProperty.call(allData, key)) {
                                 const val = allData[key];
                                 const str = typeof val === 'string' ? val : JSON.stringify(val);
-                                
                                 if (window.localStorage) {
                                     window.localStorage.setItem(key, str);
                                 }
@@ -926,24 +914,34 @@
                                 }
                             }
                         }
-                        
-                        // إعادة تحديث الواجهة فوراً لتظهر الألوان والنجوم والأسماء المحدثة
-                        if (typeof refreshCurrentView === 'function') {
-                            refreshCurrentView();
-                        }
-                        if (typeof renderHeader === 'function') {
-                            renderHeader();
-                        }
                     } catch (e) {
                         console.error("Error parsing realtime data:", e);
                     }
                 }
+                
+                // فتح قفل الحفظ السحابي بعد استلام النسخة السحابية بنجاح
+                window.isCloudReady = true;
+
+                if (typeof renderHeader === 'function') renderHeader();
+                if (typeof renderWeekSelect === 'function') renderWeekSelect();
+                if (typeof renderDailyWeekSelect === 'function') renderDailyWeekSelect();
+                if (typeof renderSummarySelect === 'function') renderSummarySelect();
+                if (typeof renderCertificateStudentSelect === 'function') renderCertificateStudentSelect();
+                if (typeof refreshCurrentView === 'function') refreshCurrentView();
+
+                // إظهار منصة التتويج بعد التأكد من وصول النجوم الحقيقية من السحابة
+                if (!sessionStorage.getItem('welcome_shown') && typeof showWelcomeTopStudents === 'function') {
+                    showWelcomeTopStudents();
+                    sessionStorage.setItem('welcome_shown', 'true');
+                }
+            }, (error) => {
+                console.error("Firebase read error:", error);
+                window.isCloudReady = true;
             });
         }
 
         initRealtimeListeners();
     </script>
-
     <!-- Main Application Script -->
     <script>
         // --- 1. Safe Storage & Cloud Firebase Sync Helpers ---
@@ -971,15 +969,15 @@
             }
         }
 
-        function safeSet(key, val) {
+          function safeSet(key, val) {
             try {
                 const str = JSON.stringify(val);
                 memoryFallback[key] = str;
                 if (window.localStorage) {
                     window.localStorage.setItem(key, str);
                 }
-                // مزامنة سحابية مع فايربيز لحظياً
-                if (typeof window.cloudSave === 'function') {
+                // مزامنة سحابية مع فايربيز فقط بعد التأكد من اكتمال التحميل السحابي الأولي
+                if (window.isCloudReady && typeof window.cloudSave === 'function') {
                     window.cloudSave(key, val);
                 }
             } catch (e) {}
@@ -1110,14 +1108,11 @@
         function getWeeklyTracker(weekId) {
             const tracker = safeGet(`weekly_tracker_${currentClass}_${weekId}`, {}, 'object');
             const roster = getRoster();
-            let updated = false;
             roster.forEach(name => {
                 if (!tracker[name] || typeof tracker[name] !== 'object') {
                     tracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, prize: "" };
-                    updated = true;
                 }
             });
-            if (updated) safeSet(`weekly_tracker_${currentClass}_${weekId}`, tracker);
             return tracker;
         }
 
@@ -1128,14 +1123,11 @@
         function getDailyTracker(weekId, dayId) {
             const tracker = safeGet(`daily_tracker_${currentClass}_${weekId}_${dayId}`, {}, 'object');
             const roster = getRoster();
-            let updated = false;
             roster.forEach(name => {
                 if (!tracker[name] || typeof tracker[name] !== 'object') {
                     tracker[name] = { p1: false, p2: false, p3: false, p4: false, p5: false };
-                    updated = true;
                 }
             });
-            if (updated) safeSet(`daily_tracker_${currentClass}_${weekId}_${dayId}`, tracker);
             return tracker;
         }
 
@@ -2709,9 +2701,18 @@
             if (!name) return;
 
             const weeklyTracker = getWeeklyTracker(currentWeek);
-            if (!weeklyTracker[name]) weeklyTracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, prize: "" };
-            weeklyTracker[name][dayKey] = !weeklyTracker[name][dayKey];
+            if (!weeklyTracker[name]) {
+                weeklyTracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, prize: "" };
+            }
+            const newState = !weeklyTracker[name][dayKey];
+            weeklyTracker[name][dayKey] = newState;
             saveWeeklyTracker(currentWeek, weeklyTracker);
+
+            // مزامنة النجوم الخمس في الجدول اليومي ليسمع في المجموع الكلي ومنصة التتويج
+            const dailyTracker = getDailyTracker(currentWeek, dayKey);
+            dailyTracker[name] = { p1: newState, p2: newState, p3: newState, p4: newState, p5: newState };
+            saveDailyTracker(currentWeek, dayKey, dailyTracker);
+
             renderTrackerTable();
         }
 
