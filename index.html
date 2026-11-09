@@ -515,14 +515,13 @@
                 </div>
             </div>
         </div>
-
-        <!-- VIEW 4: WEEKLY TRACKER -->
+<!-- VIEW 4: WEEKLY TRACKER -->
         <div id="weeklyTrackerView" class="hidden">
             <div class="bg-slate-800/85 border border-amber-500/30 rounded-2xl p-6 shadow-xl">
                 <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                     <div>
                         <h2 class="text-2xl font-bold gold-text">سجل المتابعة الأسبوعي - فصل <span class="currentClassNameDisplay"></span></h2>
-                        <p class="text-slate-400 text-sm">تتبع أيام الأسبوع (تضيء النجوم تلقائياً عند إتمام 5 نقاط في اليوم، أو بالنقر المباشر في وضع المعلم).</p>
+                        <p class="text-slate-400 text-sm">اليوم الواحد = 5 نجوم | إجمالي الأسبوع (من الأحد إلى الخميس) = <span class="text-amber-300 font-bold">25 نجمة</span>.</p>
                     </div>
                     <div class="flex items-center gap-3 flex-wrap">
                         <button type="button" id="clearAllWeeklyBtn" onclick="clearAllWeekly()" class="hidden bg-rose-600/80 hover:bg-rose-600 text-white text-sm font-bold px-3 py-2 rounded-xl transition whitespace-nowrap">
@@ -539,12 +538,12 @@
                         <thead>
                             <tr class="bg-slate-900/90 text-amber-400 border-b border-slate-700">
                                 <th class="p-3.5 rounded-r-xl">اسم الطالب</th>
-                                <th class="p-3.5 text-center">الأحد</th>
-                                <th class="p-3.5 text-center">الإثنين</th>
-                                <th class="p-3.5 text-center">الثلاثاء</th>
-                                <th class="p-3.5 text-center">الأربعاء</th>
-                                <th class="p-3.5 text-center">الخميس</th>
-                                <th class="p-3.5 text-center">⭐ إجمالي الأيام</th>
+                                <th class="p-3.5 text-center">الأحد (5⭐)</th>
+                                <th class="p-3.5 text-center">الإثنين (5⭐)</th>
+                                <th class="p-3.5 text-center">الثلاثاء (5⭐)</th>
+                                <th class="p-3.5 text-center">الأربعاء (5⭐)</th>
+                                <th class="p-3.5 text-center">الخميس (5⭐)</th>
+                                <th class="p-3.5 text-center">⭐ نجوم الأسبوع (من 25)</th>
                                 <th class="p-3.5 text-center">🏆 جائزة الأسبوع</th>
                                 <th id="thActionCol" class="p-3.5 text-center rounded-l-xl hidden">إدارة</th>
                             </tr>
@@ -561,14 +560,22 @@
                 <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                     <div>
                         <h2 class="text-2xl font-bold gold-text">تقييم وجوائز الشهور - فصل <span class="currentClassNameDisplay"></span></h2>
-                        <p class="text-slate-400 text-sm">الشهر يجمع تلقائياً نقاط 4 أسابيع (المجموع الأقصى 4 نقاط).</p>
+                        <p class="text-slate-400 text-sm">الشهر يجمع تلقائياً نجوم 4 أسابيع × 25 نجمة (المجموع الأقصى للشهر = <span class="text-amber-300 font-bold">100 نجمة</span>).</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <select id="monthSelect" onchange="changeMonth(this.value)" class="bg-slate-900 border border-amber-500/40 text-amber-300 font-bold px-4 py-2 rounded-xl focus:outline-none">
-                            <option value="month1">الشهر الأول (أسابيع 1 إلى 4)</option>
-                            <option value="month2">الشهر الثاني (أسابيع 5 إلى 8)</option>
-                            <option value="month3">الشهر الثالث (أسابيع 9 إلى 12)</option>
-                            <option value="month4">الشهر الرابع (أسابيع 13 إلى 16)</option>
+                            <optgroup label="الترم الأول">
+                                <option value="month1">الشهر الأول (أسابيع 1 إلى 4)</option>
+                                <option value="month2">الشهر الثاني (أسابيع 5 إلى 8)</option>
+                                <option value="month3">الشهر الثالث (أسابيع 9 إلى 12)</option>
+                                <option value="month4">الشهر الرابع (أسابيع 13 إلى 16)</option>
+                            </optgroup>
+                            <optgroup label="الترم الثاني">
+                                <option value="month5">الشهر الخامس (أسابيع 17 إلى 20)</option>
+                                <option value="month6">الشهر السادس (أسابيع 21 إلى 24)</option>
+                                <option value="month7">الشهر السابع (أسابيع 25 إلى 28)</option>
+                                <option value="month8">الشهر الثامن (أسابيع 29 إلى 32)</option>
+                            </optgroup>
                         </select>
                     </div>
                 </div>
@@ -577,7 +584,7 @@
                         <thead>
                             <tr class="bg-slate-900/90 text-amber-400 border-b border-slate-700">
                                 <th class="p-3.5 rounded-r-xl">اسم الطالب</th>
-                                <th class="p-3.5 text-center">🌟 نقاط الشهر (من 4)</th>
+                                <th class="p-3.5 text-center">🌟 نجوم الشهر (من 100 ⭐)</th>
                                 <th class="p-3.5 text-center">ملاحظات / تقييم المعلم</th>
                                 <th class="p-3.5 text-center rounded-l-xl">🏆 جائزة الشهر</th>
                             </tr>
@@ -594,12 +601,12 @@
                 <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                     <div>
                         <h2 class="text-2xl font-bold gold-text">حصاد وجوائز الترم الدراسي - فصل <span class="currentClassNameDisplay"></span></h2>
-                        <p class="text-slate-400 text-sm">الترم يجمع تلقائياً نقاط الشهور الأربعة (المجموع الأقصى للترم 4 نقاط).</p>
+                        <p class="text-slate-400 text-sm">الترم يجمع تلقائياً نجوم 4 شهور × 100 نجمة (المجموع الأقصى للترم = <span class="text-amber-300 font-bold">400 نجمة</span>).</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <select id="termSelect" onchange="changeTerm(this.value)" class="bg-slate-900 border border-amber-500/40 text-amber-300 font-bold px-4 py-2 rounded-xl focus:outline-none">
-                            <option value="term1">الترم الأول (الشهور 1 إلى 4)</option>
-                            <option value="term2">الترم الثاني (الشهور 5 إلى 8)</option>
+                            <option value="term1">الترم الأول (الشهور 1 إلى 4 — 400 نجمة)</option>
+                            <option value="term2">الترم الثاني (الشهور 5 إلى 8 — 400 نجمة)</option>
                         </select>
                     </div>
                 </div>
@@ -608,7 +615,7 @@
                         <thead>
                             <tr class="bg-slate-900/90 text-amber-400 border-b border-slate-700">
                                 <th class="p-3.5 rounded-r-xl">اسم الطالب</th>
-                                <th class="p-3.5 text-center">🎖️ إجمالي نقاط الترم (من 4)</th>
+                                <th class="p-3.5 text-center">🎖️ إجمالي نجوم الترم (من 400 ⭐)</th>
                                 <th class="p-3.5 text-center">تقرير الأداء العام</th>
                                 <th class="p-3.5 text-center rounded-l-xl">🏆 جائزة الترم الكبرى</th>
                             </tr>
@@ -1222,7 +1229,7 @@
                     "المجموعة": group,
                     "إجمالي النجوم الفردية": totalStars,
                     "رتبة الفارس": rank.title,
-                    "تقييم حصاد الترم (من 4)": termPts,
+                    "نجوم حصاد الترم (من 400)": termPts,
                     "مادة الدراسات / المادة": header.subject
                 });
             });
@@ -1688,7 +1695,7 @@
                 ? `وتتويجاً لحصوله على مرتبة (${rank.title}) وتكريمه في (${honors.map(h => h.reason).join('، ')})`
                 : `وتقديراً لبيانه الرفيع، ومشاركته الفاعلة ضمن (${grp}) بحصوله على رتبة (${rank.title})`;
 
-            return `تقديراً لجهوده المباركة، وشغفه بجماليات اللغة العربية وآدابها، ${honorText}، وحصوله على تقييم عام (${t1} من 4) في حصاد الفصل الدراسي، سائلين الله له دوام التوفيق والسداد.`;
+            return `تقديراً لجهوده المباركة، وشغفه بجماليات اللغة العربية وآدابها، ${honorText}، وحصوله على تقييم عام (${t1} من 400 نجمة) في حصاد الفصل الدراسي، سائلين الله له دوام التوفيق والسداد.`;
         }
 
         function renderCertificateStudentSelect(preselectedName = null) {
@@ -2746,6 +2753,24 @@
             renderTrackerTable();
         }
 
+        // دالة مساعدة لحساب نجوم الطالب في يوم محدد (من 5 نجوم)
+        function getStudentDayStars(studentName, weekId, dayId) {
+            const dailyTracker = getDailyTracker(weekId, dayId);
+            const st = dailyTracker[studentName];
+            let sum = 0;
+            if (st) {
+                sum = (st.p1 ? 1 : 0) + (st.p2 ? 1 : 0) + (st.p3 ? 1 : 0) + (st.p4 ? 1 : 0) + (st.p5 ? 1 : 0);
+            }
+            if (sum > 0) return sum;
+
+            // احتياطي للبيانات القديمة في حال كان اليوم معلماً في الأسبوع مباشرة
+            const weeklyTracker = getWeeklyTracker(weekId);
+            if (weeklyTracker[studentName] && weeklyTracker[studentName][dayId]) {
+                return 5;
+            }
+            return 0;
+        }
+
         function renderTrackerTable() {
             const tbody = document.getElementById('trackerTableBody');
             if (!tbody) return;
@@ -2758,10 +2783,24 @@
                 return;
             }
 
+            const days = ['sun', 'mon', 'tue', 'wed', 'thu'];
+
             roster.forEach((name, rIdx) => {
                 const st = tracker[name] || { sun: false, mon: false, tue: false, wed: false, thu: false, prize: "" };
-                const weekPts = getStudentWeekPoints(name, currentWeek);
+                const weekStars = getStudentWeekPoints(name, currentWeek); // من 25 نجمة
+                const completedDays = days.filter(d => getStudentDayStars(name, currentWeek, d) === 5).length;
                 const rank = getStudentKnightRank(name);
+
+                const buildDayCell = (dayKey) => {
+                    const dStars = getStudentDayStars(name, currentWeek, dayKey);
+                    const isFull = dStars === 5 || st[dayKey];
+                    return `
+                        <td class="p-3.5 text-center">
+                            <button type="button" onclick="toggleWeeklyDayByIndex(${rIdx}, '${dayKey}')" class="star-btn">${isFull ? '⭐' : '⚪'}</button>
+                            <div class="text-[10px] font-bold ${isFull ? 'text-emerald-400' : (dStars > 0 ? 'text-amber-300' : 'text-slate-500')}">${dStars} / 5</div>
+                        </td>
+                    `;
+                };
 
                 const row = document.createElement('tr');
                 row.className = "hover:bg-slate-900/40 transition";
@@ -2770,12 +2809,15 @@
                         ${name}
                         <span class="text-[10px] text-amber-400 block font-normal">${rank.badge}</span>
                     </td>
-                    <td class="p-3.5 text-center"><button type="button" onclick="toggleWeeklyDayByIndex(${rIdx}, 'sun')" class="star-btn">${st.sun ? '⭐' : '⚪'}</button></td>
-                    <td class="p-3.5 text-center"><button type="button" onclick="toggleWeeklyDayByIndex(${rIdx}, 'mon')" class="star-btn">${st.mon ? '⭐' : '⚪'}</button></td>
-                    <td class="p-3.5 text-center"><button type="button" onclick="toggleWeeklyDayByIndex(${rIdx}, 'tue')" class="star-btn">${st.tue ? '⭐' : '⚪'}</button></td>
-                    <td class="p-3.5 text-center"><button type="button" onclick="toggleWeeklyDayByIndex(${rIdx}, 'wed')" class="star-btn">${st.wed ? '⭐' : '⚪'}</button></td>
-                    <td class="p-3.5 text-center"><button type="button" onclick="toggleWeeklyDayByIndex(${rIdx}, 'thu')" class="star-btn">${st.thu ? '⭐' : '⚪'}</button></td>
-                    <td class="p-3.5 text-center font-black text-amber-400 text-lg">${weekPts} / 5 أيام</td>
+                    ${buildDayCell('sun')}
+                    ${buildDayCell('mon')}
+                    ${buildDayCell('tue')}
+                    ${buildDayCell('wed')}
+                    ${buildDayCell('thu')}
+                    <td class="p-3.5 text-center">
+                        <div class="font-black text-amber-400 text-lg">${weekStars} / 25 ⭐</div>
+                        <div class="text-[11px] text-slate-400 font-semibold">(${completedDays} / 5 أيام مكتملة)</div>
+                    </td>
                     <td class="p-3.5 text-center">
                         <input type="text" value="${st.prize || ''}" ${!isTeacherMode ? 'readonly' : ''} onchange="updateTrackerPrizeByIndex(${rIdx}, this.value)" placeholder="جائزة الأسبوع..." class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-amber-300 text-sm text-center w-36 focus:outline-none focus:border-amber-500">
                     </td>
@@ -2807,27 +2849,44 @@
             if (tracker[name]) {
                 tracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, prize: tracker[name].prize || "" };
                 saveWeeklyTracker(currentWeek, tracker);
-                renderTrackerTable();
             }
+            // تصفير النجوم اليومية الخمس لهذا الطالب في هذا الأسبوع أيضاً
+            ['sun', 'mon', 'tue', 'wed', 'thu'].forEach(dayKey => {
+                const dailyTracker = getDailyTracker(currentWeek, dayKey);
+                dailyTracker[name] = { p1: false, p2: false, p3: false, p4: false, p5: false };
+                saveDailyTracker(currentWeek, dayKey, dailyTracker);
+            });
+            renderTrackerTable();
         }
 
         function clearAllWeekly() {
             if (!requireTeacherOrPrompt()) return;
-            if (confirm("هل أنت متأكد من مسح جميع أيام هذا الأسبوع لجميع الطلاب؟")) {
+            if (confirm("هل أنت متأكد من مسح جميع نجوم وأيام هذا الأسبوع لجميع الطلاب؟")) {
                 const tracker = getWeeklyTracker(currentWeek);
                 Object.keys(tracker).forEach(name => {
                     tracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, prize: tracker[name].prize || "" };
                 });
                 saveWeeklyTracker(currentWeek, tracker);
+
+                ['sun', 'mon', 'tue', 'wed', 'thu'].forEach(dayKey => {
+                    const dailyTracker = getDailyTracker(currentWeek, dayKey);
+                    Object.keys(dailyTracker).forEach(name => {
+                        dailyTracker[name] = { p1: false, p2: false, p3: false, p4: false, p5: false };
+                    });
+                    saveDailyTracker(currentWeek, dayKey, dailyTracker);
+                });
                 renderTrackerTable();
             }
         }
 
+        // حساب نجوم الأسبوع للطالب (5 أيام × 5 نجوم = من 25 نجمة)
         function getStudentWeekPoints(studentName, weekId) {
-            const tracker = getWeeklyTracker(weekId);
-            const st = tracker[studentName];
-            if (!st) return 0;
-            return (st.sun ? 1 : 0) + (st.mon ? 1 : 0) + (st.tue ? 1 : 0) + (st.wed ? 1 : 0) + (st.thu ? 1 : 0);
+            const days = ['sun', 'mon', 'tue', 'wed', 'thu'];
+            let totalStars = 0;
+            days.forEach(d => {
+                totalStars += getStudentDayStars(studentName, weekId, d);
+            });
+            return totalStars;
         }
 
         function getWeeksForMonth(monthId) {
@@ -2836,26 +2895,34 @@
                 case 'month2': return ['week5', 'week6', 'week7', 'week8'];
                 case 'month3': return ['week9', 'week10', 'week11', 'week12'];
                 case 'month4': return ['week13', 'week14', 'week15', 'week16'];
+                case 'month5': return ['week17', 'week18', 'week19', 'week20'];
+                case 'month6': return ['week21', 'week22', 'week23', 'week24'];
+                case 'month7': return ['week25', 'week26', 'week27', 'week28'];
+                case 'month8': return ['week29', 'week30', 'week31', 'week32'];
                 default: return [];
             }
         }
 
+        // حساب نجوم الشهر للطالب (4 أسابيع × 25 نجمة = من 100 نجمة)
         function getStudentMonthPoints(studentName, monthId) {
             const weeks = getWeeksForMonth(monthId);
-            let total = 0;
+            let totalStars = 0;
             weeks.forEach(w => {
-                total += (getStudentWeekPoints(studentName, w) / 5);
+                totalStars += getStudentWeekPoints(studentName, w);
             });
-            return Math.round(total * 10) / 10;
+            return totalStars;
         }
 
-        function getStudentTermPoints(studentName) {
-            const months = ['month1', 'month2', 'month3', 'month4'];
-            let total = 0;
+        // حساب نجوم الترم الأول أو الثاني للطالب (4 شهور × 100 نجمة = من 400 نجمة)
+        function getStudentTermPoints(studentName, termId = currentTerm) {
+            const months = termId === 'term2'
+                ? ['month5', 'month6', 'month7', 'month8']
+                : ['month1', 'month2', 'month3', 'month4'];
+            let totalStars = 0;
             months.forEach(m => {
-                total += (getStudentMonthPoints(studentName, m) / 4);
+                totalStars += getStudentMonthPoints(studentName, m);
             });
-            return Math.round(total * 10) / 10;
+            return totalStars;
         }
 
         function changeMonth(m) {
@@ -2877,7 +2944,7 @@
 
             roster.forEach((name, rIdx) => {
                 const st = monthlyData[name] || { eval: "", prize: "" };
-                const monthPts = getStudentMonthPoints(name, currentMonth);
+                const monthStars = getStudentMonthPoints(name, currentMonth); // من 100 نجمة
                 const rank = getStudentKnightRank(name);
 
                 const row = document.createElement('tr');
@@ -2887,7 +2954,7 @@
                         ${name}
                         <span class="text-[10px] text-amber-400 block font-normal">${rank.badge}</span>
                     </td>
-                    <td class="p-3.5 text-center font-black text-amber-400 text-xl">${monthPts} / 4</td>
+                    <td class="p-3.5 text-center font-black text-amber-400 text-xl">${monthStars} / 100 ⭐</td>
                     <td class="p-3.5 text-center">
                         <input type="text" value="${st.eval || ''}" ${!isTeacherMode ? 'readonly' : ''} onchange="updateMonthlyFieldByIndex(${rIdx}, 'eval', this.value)" placeholder="ملاحظات وتقييم الشهر..." class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-200 text-sm text-center w-full max-w-sm focus:outline-none focus:border-amber-500">
                     </td>
@@ -2929,7 +2996,7 @@
 
             roster.forEach((name, rIdx) => {
                 const st = termData[name] || { eval: "", prize: "" };
-                const termPts = getStudentTermPoints(name);
+                const termStars = getStudentTermPoints(name, currentTerm); // من 400 نجمة
                 const rank = getStudentKnightRank(name);
 
                 const row = document.createElement('tr');
@@ -2939,7 +3006,7 @@
                         ${name}
                         <span class="text-[10px] text-amber-400 block font-normal">${rank.badge}</span>
                     </td>
-                    <td class="p-3.5 text-center font-black text-amber-300 text-2xl">${termPts} / 4</td>
+                    <td class="p-3.5 text-center font-black text-amber-300 text-2xl">${termStars} / 400 ⭐</td>
                     <td class="p-3.5 text-center">
                         <input type="text" value="${st.eval || ''}" ${!isTeacherMode ? 'readonly' : ''} onchange="updateTermFieldByIndex(${rIdx}, 'eval', this.value)" placeholder="تقرير الأداء الكلي للترم..." class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-200 text-sm text-center w-full max-w-sm focus:outline-none focus:border-amber-500">
                     </td>
@@ -2961,7 +3028,6 @@
             termData[name][field] = val;
             saveTermData(termData);
         }
-
         // --- 10. Student Dossier / Summary ---
         function renderSummarySelect() {
             const select = document.getElementById('summaryStudentSelect');
@@ -3571,17 +3637,48 @@
     </div>
 </div>
 
-<!-- نافذة الترحيب بمنصة تتويج الأوائل -->
-<div id="welcomeTopStudentsModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-[100]">
-    <div class="bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 md:p-10 w-full max-w-4xl shadow-2xl text-center relative overflow-hidden">
+<!-- نافذة الترحيب بمنصة تتويج الأوائل (شاملة الثلاث فصول والفترات الزمنية) -->
+<div id="welcomeTopStudentsModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-[100] overflow-y-auto">
+    <div class="bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-amber-500/50 rounded-3xl p-5 md:p-8 w-full max-w-4xl shadow-2xl text-center relative overflow-hidden my-auto">
         
         <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/20 via-slate-900/5 to-transparent pointer-events-none"></div>
 
-        <h2 class="text-3xl md:text-5xl font-black gold-text mb-2 relative z-10">🏆 لوحة الشرف الملكية 🏆</h2>
-        <p class="text-amber-200/80 text-sm md:text-base font-bold mb-8 relative z-10">فرسان الصدارة والأعلى حصولاً على النجوم في فصل <span class="currentClassNameDisplay text-amber-400"></span></p>
+        <h2 class="text-3xl md:text-5xl font-black gold-text mb-2 relative z-10">🏆 منصة تتويج الأوائل الملكية 🏆</h2>
+        <p id="podiumSubtitle" class="text-amber-200/90 text-sm md:text-base font-bold mb-5 relative z-10">
+            فرسان الصدارة والأعلى حصولاً على النجوم على مستوى الفصول الثلاثة (Jade • Crystal • Opal)
+        </p>
+
+        <!-- أزرار تحديد النطاق (الثلاث فصول معاً أو الفصل الحالي) -->
+        <div class="flex flex-wrap justify-center gap-2 mb-3 relative z-10">
+            <button type="button" onclick="changePodiumScope('all')" id="podiumScope_all" class="px-4 py-1.5 rounded-xl font-black text-xs md:text-sm transition bg-amber-500 text-slate-950 shadow-lg">
+                🌍 أوائل الثلاث فصول معاً
+            </button>
+            <button type="button" onclick="changePodiumScope('current')" id="podiumScope_current" class="px-4 py-1.5 rounded-xl font-bold text-xs md:text-sm transition bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600">
+                🏫 أوائل فصل <span class="currentClassNameDisplay"></span> فقط
+            </button>
+        </div>
+
+        <!-- أزرار تحديد الفترة الزمنية (الأسبوع / الشهر / الترم / العام كاملاً) -->
+        <div class="flex flex-wrap justify-center items-center gap-2 mb-6 bg-slate-900/80 p-2.5 rounded-2xl border border-amber-500/30 max-w-2xl mx-auto relative z-10">
+            <button type="button" onclick="changePodiumPeriod('week')" id="podiumPeriod_week" class="px-3.5 py-1.5 rounded-xl font-bold text-xs md:text-sm transition bg-slate-800 hover:bg-slate-700 text-slate-300">
+                📅 الأسبوع
+            </button>
+            <button type="button" onclick="changePodiumPeriod('month')" id="podiumPeriod_month" class="px-3.5 py-1.5 rounded-xl font-bold text-xs md:text-sm transition bg-slate-800 hover:bg-slate-700 text-slate-300">
+                🗓️ الشهر
+            </button>
+            <button type="button" onclick="changePodiumPeriod('term')" id="podiumPeriod_term" class="px-3.5 py-1.5 rounded-xl font-bold text-xs md:text-sm transition bg-slate-800 hover:bg-slate-700 text-slate-300">
+                🎖️ الترم
+            </button>
+            <button type="button" onclick="changePodiumPeriod('year')" id="podiumPeriod_year" class="px-3.5 py-1.5 rounded-xl font-black text-xs md:text-sm transition bg-amber-500 text-slate-950 shadow">
+                👑 العام كاملاً
+            </button>
+
+            <!-- قائمة فرعية لاختيار الأسبوع أو الشهر أو الترم المحدد -->
+            <select id="podiumSubFilterSelect" onchange="renderPodiumCards()" class="hidden bg-slate-800 border border-amber-500/50 text-amber-300 font-bold text-xs px-3 py-1.5 rounded-xl focus:outline-none"></select>
+        </div>
 
         <!-- منصة التتويج (Podium) -->
-        <div id="podiumContainer" class="flex flex-col md:flex-row justify-center items-end gap-4 md:gap-6 mb-10 relative z-10 min-h-[250px]"></div>
+        <div id="podiumContainer" class="flex flex-col md:flex-row justify-center items-end gap-4 md:gap-6 mb-8 relative z-10 min-h-[260px]"></div>
 
         <button type="button" onclick="closeWelcomeModal()" class="relative z-10 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-900 font-black text-lg px-10 py-3 rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.4)] transition transform hover:scale-105">
             ✨ الدخول إلى لوحة الفصل ✨
@@ -3705,54 +3802,241 @@
     }
 
     // ==========================================
-    // دوال منصة التتويج (Top 3 Podium)
+    // دوال منصة التتويج الشاملة (Top 3 Podium)
     // ==========================================
-    function showWelcomeTopStudents() {
-        const roster = typeof getRoster === 'function' ? getRoster() : [];
-        if (roster.length === 0) return;
+    let podiumScope = 'all';   // 'all' = الثلاث فصول معاً | 'current' = الفصل الحالي فقط
+    let podiumPeriod = 'year'; // 'week' | 'month' | 'term' | 'year'
 
-        const honorList = typeof getHonorStudents === 'function' ? getHonorStudents().map(h => h.name) : [];
+    function getClassRosterByKey(cls) {
+        const list = safeGet(`class_roster_${cls}`, defaultRosters[cls] || [], 'array');
+        return list.filter(item => typeof item === 'string' && item.trim().length > 0);
+    }
 
-        let studentsData = roster.map(name => {
-            return {
-                name: name,
-                score: typeof calculateStudentTotalScore === 'function' ? calculateStudentTotalScore(name) : 0,
-                isHonored: honorList.includes(name),
-                rank: typeof getStudentKnightRank === 'function' ? getStudentKnightRank(name) : { badge: '📜 ساعي البيان' }
-            };
+    function getClassHonorNamesByKey(cls) {
+        const list = safeGet(`honor_students_${cls}`, defaultHonor[cls] || [], 'array');
+        return list.filter(s => s && typeof s === 'object' && s.name).map(s => s.name);
+    }
+
+    function getClassWeeksByKey(cls) {
+        let default16 = [];
+        for (let i = 1; i <= 16; i++) default16.push(`week${i}`);
+        const list = safeGet(`weeks_list_${cls}`, default16, 'array');
+        return list.length > 0 ? list : default16;
+    }
+
+    function calculateStudentStarsByPeriod(cls, studentName, period, subFilterValue) {
+        let targetWeeks = [];
+        const allClassWeeks = getClassWeeksByKey(cls);
+
+        if (period === 'week') {
+            targetWeeks = [subFilterValue || currentWeek || 'week1'];
+        } else if (period === 'month') {
+            targetWeeks = getWeeksForMonth(subFilterValue || currentMonth || 'month1');
+        } else if (period === 'term') {
+            const selectedTerm = subFilterValue || currentTerm || 'term1';
+            if (selectedTerm === 'term1') {
+                targetWeeks = allClassWeeks.slice(0, 16);
+            } else {
+                targetWeeks = allClassWeeks.length > 16 ? allClassWeeks.slice(16) : allClassWeeks;
+            }
+        } else {
+            // العام كاملاً
+            targetWeeks = allClassWeeks;
+        }
+
+        let stars = 0;
+        const days = ['sun', 'mon', 'tue', 'wed', 'thu'];
+        targetWeeks.forEach(w => {
+            days.forEach(d => {
+                const dailyTracker = safeGet(`daily_tracker_${cls}_${w}_${d}`, {}, 'object');
+                const st = dailyTracker[studentName];
+                if (st) {
+                    if (st.p1) stars++;
+                    if (st.p2) stars++;
+                    if (st.p3) stars++;
+                    if (st.p4) stars++;
+                    if (st.p5) stars++;
+                }
+            });
+        });
+        return stars;
+    }
+
+    function getKnightRankByScore(totalYearStars) {
+        if (totalYearStars > 50) return { title: "سلطان البلاغة", badge: "👑 سلطان البلاغة" };
+        if (totalYearStars >= 31) return { title: "قائد الفصاحة", badge: "🛡️ قائد الفصاحة" };
+        if (totalYearStars >= 16) return { title: "أمير الكلمة", badge: "🌟 أمير الكلمة" };
+        if (totalYearStars >= 6) return { title: "فارس الحرف", badge: "⚔️ فارس الحرف" };
+        return { title: "ساعي البيان", badge: "📜 ساعي البيان" };
+    }
+
+    function changePodiumScope(scope) {
+        podiumScope = scope;
+        const btnAll = document.getElementById('podiumScope_all');
+        const btnCur = document.getElementById('podiumScope_current');
+
+        if (btnAll && btnCur) {
+            btnAll.className = scope === 'all'
+                ? "px-4 py-1.5 rounded-xl font-black text-xs md:text-sm transition bg-amber-500 text-slate-950 shadow-lg"
+                : "px-4 py-1.5 rounded-xl font-bold text-xs md:text-sm transition bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600";
+            btnCur.className = scope === 'current'
+                ? "px-4 py-1.5 rounded-xl font-black text-xs md:text-sm transition bg-amber-500 text-slate-950 shadow-lg"
+                : "px-4 py-1.5 rounded-xl font-bold text-xs md:text-sm transition bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600";
+        }
+        renderPodiumCards();
+    }
+
+    function changePodiumPeriod(period) {
+        podiumPeriod = period;
+        ['week', 'month', 'term', 'year'].forEach(p => {
+            const btn = document.getElementById(`podiumPeriod_${p}`);
+            if (btn) {
+                btn.className = p === period
+                    ? "px-3.5 py-1.5 rounded-xl font-black text-xs md:text-sm transition bg-amber-500 text-slate-950 shadow"
+                    : "px-3.5 py-1.5 rounded-xl font-bold text-xs md:text-sm transition bg-slate-800 hover:bg-slate-700 text-slate-300";
+            }
         });
 
-        // ترتيب الطلاب حسب النجوم، وفي حال التساوي يُقدم الطالب المكرّم في لوحة الشرف
-        studentsData.sort((a, b) => {
+        const subSelect = document.getElementById('podiumSubFilterSelect');
+        if (subSelect) {
+            subSelect.innerHTML = '';
+            if (period === 'week') {
+                const weeks = getAvailableWeeks();
+                weeks.forEach((w, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = w;
+                    opt.textContent = `الأسبوع رقم ${idx + 1}`;
+                    if (w === currentWeek) opt.selected = true;
+                    subSelect.appendChild(opt);
+                });
+                subSelect.classList.remove('hidden');
+            } else if (period === 'month') {
+                const months = [
+                    { id: 'month1', label: 'الشهر الأول (أسابيع 1-4)' },
+                    { id: 'month2', label: 'الشهر الثاني (أسابيع 5-8)' },
+                    { id: 'month3', label: 'الشهر الثالث (أسابيع 9-12)' },
+                    { id: 'month4', label: 'الشهر الرابع (أسابيع 13-16)' }
+                ];
+                months.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = m.label;
+                    if (m.id === currentMonth) opt.selected = true;
+                    subSelect.appendChild(opt);
+                });
+                subSelect.classList.remove('hidden');
+            } else if (period === 'term') {
+                const terms = [
+                    { id: 'term1', label: 'الترم الأول' },
+                    { id: 'term2', label: 'الترم الثاني' }
+                ];
+                terms.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.textContent = t.label;
+                    if (t.id === currentTerm) opt.selected = true;
+                    subSelect.appendChild(opt);
+                });
+                subSelect.classList.remove('hidden');
+            } else {
+                subSelect.classList.add('hidden');
+            }
+        }
+
+        renderPodiumCards();
+    }
+
+    function renderPodiumCards() {
+        const classesToScan = podiumScope === 'all' ? ['jade', 'crystal', 'opal'] : [currentClass];
+        const subSelect = document.getElementById('podiumSubFilterSelect');
+        const subFilterValue = subSelect ? subSelect.value : '';
+
+        const periodLabels = {
+            week: 'خلال الأسبوع المحدد',
+            month: 'خلال الشهر المحدد',
+            term: 'خلال الترم الدراسي',
+            year: 'خلال العام الدراسي كاملاً'
+        };
+
+        const subtitle = document.getElementById('podiumSubtitle');
+        if (subtitle) {
+            const scopeText = podiumScope === 'all'
+                ? 'على مستوى الفصول الثلاثة (Jade • Crystal • Opal)'
+                : `في فصل (${currentClass.toUpperCase()})`;
+            subtitle.innerText = `فرسان الصدارة والأعلى حصولاً على النجوم ${scopeText} — ${periodLabels[podiumPeriod]}`;
+        }
+
+        let allCandidates = [];
+
+        classesToScan.forEach(cls => {
+            const roster = getClassRosterByKey(cls);
+            const honorNames = getClassHonorNamesByKey(cls);
+
+            roster.forEach(name => {
+                const periodScore = calculateStudentStarsByPeriod(cls, name, podiumPeriod, subFilterValue);
+                const totalYearScore = calculateStudentStarsByPeriod(cls, name, 'year', '');
+                const rank = getKnightRankByScore(totalYearScore);
+
+                allCandidates.push({
+                    name: name,
+                    className: cls.toUpperCase(),
+                    score: periodScore,
+                    totalYearScore: totalYearScore,
+                    isHonored: honorNames.includes(name),
+                    rank: rank
+                });
+            });
+        });
+
+        // ترتيب تنازلي حسب نجوم الفترة المختارة، ثم إجمالي نجوم العام، ثم المكرمين في لوحة الشرف
+        allCandidates.sort((a, b) => {
             if (b.score !== a.score) return b.score - a.score;
+            if (b.totalYearScore !== a.totalYearScore) return b.totalYearScore - a.totalYearScore;
             return (b.isHonored ? 1 : 0) - (a.isHonored ? 1 : 0);
         });
-        
-        const top3 = studentsData.slice(0, 3);
-        if (top3.length === 0) return; 
 
+        const top3 = allCandidates.slice(0, 3);
         const podiumContainer = document.getElementById('podiumContainer');
         if (!podiumContainer) return;
         podiumContainer.innerHTML = '';
 
+        if (top3.length === 0) {
+            podiumContainer.innerHTML = `<p class="text-slate-400 py-10">لا توجد بيانات طلاب مسجلة حالياً.</p>`;
+            return;
+        }
+
         const buildPodiumCard = (student, placeNum, colors, heightClass, icon) => `
-            <div class="flex flex-col items-center order-${placeNum === 1 ? '1 md:order-2' : (placeNum === 2 ? '2 md:order-1' : '3 md:order-3')} transform ${placeNum === 1 ? 'scale-110 z-10' : 'scale-95'} transition duration-500 hover:scale-110">
+            <div class="flex flex-col items-center order-${placeNum === 1 ? '1 md:order-2' : (placeNum === 2 ? '2 md:order-1' : '3 md:order-3')} transform ${placeNum === 1 ? 'scale-105 md:scale-110 z-10' : 'scale-95'} transition duration-500 hover:scale-110">
                 <div class="text-4xl mb-2">${icon}</div>
-                <div class="${colors.bg} ${colors.border} border-2 rounded-2xl p-4 shadow-2xl flex flex-col items-center justify-center w-40 sm:w-48 ${heightClass}">
-                    <h3 class="text-white font-black text-lg text-center mb-1 leading-tight">${student.name}</h3>
-                    <div class="text-[10px] font-bold ${colors.text} mb-3 text-center">${student.rank.badge}</div>
-                    <div class="bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700/50">
+                <div class="${colors.bg} ${colors.border} border-2 rounded-2xl p-4 shadow-2xl flex flex-col items-center justify-center w-44 sm:w-52 ${heightClass}">
+                    <span class="text-[11px] font-black bg-slate-900/90 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full mb-1.5">
+                        فصل ${student.className}
+                    </span>
+                    <h3 class="text-white font-black text-base sm:text-lg text-center mb-1 leading-tight">${student.name}</h3>
+                    <div class="text-[10px] font-bold ${colors.text} mb-2.5 text-center">${student.rank.badge}</div>
+                    <div class="bg-slate-900/85 px-3.5 py-1 rounded-xl border border-slate-700/60">
                         <span class="font-black text-xl text-white">${student.score}</span>
-                        <span class="text-xs ${colors.text}">نجمة</span>
+                        <span class="text-xs ${colors.text}">⭐ نجمة</span>
                     </div>
                 </div>
-                <div class="mt-3 font-black ${colors.text} text-xl drop-shadow-md">${placeNum === 1 ? 'المركز الأول' : (placeNum === 2 ? 'المركز الثاني' : 'المركز الثالث')}</div>
+                <div class="mt-3 font-black ${colors.text} text-lg md:text-xl drop-shadow-md">
+                    ${placeNum === 1 ? 'المركز الأول' : (placeNum === 2 ? 'المركز الثاني' : 'المركز الثالث')}
+                </div>
             </div>
         `;
 
-        if (top3[1]) podiumContainer.innerHTML += buildPodiumCard(top3[1], 2, {bg: 'bg-slate-400/20', border: 'border-slate-300', text: 'text-slate-300'}, 'h-40', '🥈');
-        if (top3[0]) podiumContainer.innerHTML += buildPodiumCard(top3[0], 1, {bg: 'bg-amber-500/20', border: 'border-amber-400', text: 'text-amber-400'}, 'h-48', '👑');
-        if (top3[2]) podiumContainer.innerHTML += buildPodiumCard(top3[2], 3, {bg: 'bg-orange-600/20', border: 'border-orange-500', text: 'text-orange-400'}, 'h-36', '🥉');
+        if (top3[1]) podiumContainer.innerHTML += buildPodiumCard(top3[1], 2, {bg: 'bg-slate-400/20', border: 'border-slate-300', text: 'text-slate-300'}, 'h-44', '🥈');
+        if (top3[0]) podiumContainer.innerHTML += buildPodiumCard(top3[0], 1, {bg: 'bg-amber-500/20', border: 'border-amber-400', text: 'text-amber-400'}, 'h-52', '👑');
+        if (top3[2]) podiumContainer.innerHTML += buildPodiumCard(top3[2], 3, {bg: 'bg-orange-600/20', border: 'border-orange-500', text: 'text-orange-400'}, 'h-40', '🥉');
+    }
+
+    function showWelcomeTopStudents() {
+        document.querySelectorAll('.currentClassNameDisplay').forEach(el => {
+            if (typeof currentClass !== 'undefined') el.innerText = currentClass.toUpperCase();
+        });
+
+        changePodiumScope(podiumScope);
+        changePodiumPeriod(podiumPeriod);
 
         document.getElementById('welcomeTopStudentsModal').classList.remove('hidden');
         document.getElementById('welcomeTopStudentsModal').classList.add('flex');
@@ -3768,8 +4052,6 @@
         document.getElementById('welcomeTopStudentsModal').classList.remove('flex');
         document.getElementById('welcomeTopStudentsModal').classList.add('hidden');
     }
-
-    // تشغيل نافذة التتويج تلقائياً بعد تحميل الصفحة ومزامنة البيانات مباشرة
 
 </script>
 </body>
