@@ -164,6 +164,8 @@
             #winnerModal,
             #diceEditorModal,
             #pinModal,
+            #changePasswordModal,
+            #classesManageModal,
             #headerModal,
             #addModal,
             #rosterModal {
@@ -256,11 +258,19 @@
     <button type="button" onclick="openRosterModal()" id="rosterBtn" class="hidden bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm items-center gap-1.5">
         <span>👥 إدارة الفصل</span>
     </button>
+
+    <button type="button" onclick="openClassesManageModal()" id="manageClassesBtn" class="hidden bg-teal-600 hover:bg-teal-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm items-center gap-1.5">
+        <span>🏫 إدارة الفصول</span>
+    </button>
     
     <button type="button" onclick="openHeaderModal()" id="settingsHeaderBtn" class="hidden bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm items-center gap-1.5">
         <span>⚙️ إعدادات اللوحة</span>
     </button>
-    
+
+    <button type="button" onclick="openChangePasswordModal()" id="changePassBtn" class="hidden bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-sm items-center gap-1.5">
+        <span>🔑 تغيير كلمة المرور</span>
+    </button>
+
     <button type="button" onclick="resetCorruptedStorage()" id="resetStorageBtn" class="hidden bg-rose-700 hover:bg-rose-600 text-white font-bold px-3 py-1.5 rounded-xl shadow transition text-xs items-center gap-1" title="إعادة ضبط مصنع للبيانات في حال تلفها">
         <span>🛠️ تصفير البيانات</span>
     </button>
@@ -304,12 +314,10 @@
             </div>
         </header>
 
-        <!-- Classes Selector Bar -->
-        <div class="flex justify-center items-center gap-3 mb-6 bg-slate-900/80 p-3 rounded-2xl border border-amber-500/30 max-w-xl mx-auto">
+        <!-- Classes Selector Bar (Dynamic) -->
+        <div class="flex flex-wrap justify-center items-center gap-3 mb-6 bg-slate-900/80 p-3 rounded-2xl border border-amber-500/30 max-w-3xl mx-auto">
             <span class="text-amber-400 font-bold ml-2">اختر الفصل:</span>
-            <button type="button" onclick="switchClass('jade')" id="jadeBtn" class="class-tab flex-1 py-2 px-4 rounded-xl font-bold bg-amber-500 text-slate-900 shadow transition">Jade</button>
-            <button type="button" onclick="switchClass('crystal')" id="crystalBtn" class="class-tab flex-1 py-2 px-4 rounded-xl font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Crystal</button>
-            <button type="button" onclick="switchClass('opal')" id="opalBtn" class="class-tab flex-1 py-2 px-4 rounded-xl font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Opal</button>
+            <div id="classesButtonsContainer" class="flex flex-wrap gap-2 flex-1 justify-center"></div>
         </div>
 
         <!-- Main View Switcher Tabs -->
@@ -519,6 +527,7 @@
                             <tr class="bg-slate-900/90 text-amber-400 border-b border-slate-700">
                                 <th class="p-3.5 rounded-r-xl">اسم الطالب</th>
                                 <th class="p-3.5 text-center">المجموعة</th>
+                                <th class="p-3.5 text-center">📋 الحضور</th>
                                 <th class="p-3.5 text-center">نجمة 1 ⭐</th>
                                 <th class="p-3.5 text-center">نجمة 2 ⭐</th>
                                 <th class="p-3.5 text-center">نجمة 3 ⭐</th>
@@ -561,6 +570,14 @@
                                 <th class="p-3.5 text-center">الثلاثاء (5⭐)</th>
                                 <th class="p-3.5 text-center">الأربعاء (5⭐)</th>
                                 <th class="p-3.5 text-center">الخميس (5⭐)</th>
+                                <th class="p-3.5 text-center">📓 الواجب الأسبوعي</th>
+                                <th class="p-3.5 text-center">
+                                    <div>📝 التقييم الأسبوعي</div>
+                                    <div class="text-[11px] text-slate-300 mt-1 flex items-center justify-center gap-1 font-normal">
+                                        <span>الدرجة من:</span>
+                                        <input type="number" id="weeklyMaxQuizInput" min="1" value="10" onchange="updateWeeklyMaxQuiz(this.value)" class="w-14 bg-slate-800 border border-amber-500/50 rounded px-1 py-0.5 text-center text-amber-300 font-bold text-xs focus:outline-none">
+                                    </div>
+                                </th>
                                 <th class="p-3.5 text-center">⭐ نجوم الأسبوع (من 25)</th>
                                 <th class="p-3.5 text-center">🏆 جائزة الأسبوع</th>
                                 <th id="thActionCol" class="p-3.5 text-center rounded-l-xl hidden">إدارة</th>
@@ -603,6 +620,13 @@
                             <tr class="bg-slate-900/90 text-amber-400 border-b border-slate-700">
                                 <th class="p-3.5 rounded-r-xl">اسم الطالب</th>
                                 <th class="p-3.5 text-center">🌟 نجوم الشهر (من 100 ⭐)</th>
+                                <th class="p-3.5 text-center">
+                                    <div>📄 اختبار الشهر</div>
+                                    <div class="text-[11px] text-slate-300 mt-1 flex items-center justify-center gap-1 font-normal">
+                                        <span>الدرجة من:</span>
+                                        <input type="number" id="monthlyMaxExamInput" min="1" value="20" onchange="updateMonthlyMaxExam(this.value)" class="w-14 bg-slate-800 border border-sky-500/50 rounded px-1 py-0.5 text-center text-sky-300 font-bold text-xs focus:outline-none">
+                                    </div>
+                                </th>
                                 <th class="p-3.5 text-center">ملاحظات / تقييم المعلم</th>
                                 <th class="p-3.5 text-center rounded-l-xl">🏆 جائزة الشهر</th>
                             </tr>
@@ -792,15 +816,35 @@
         </div>
     </div>
 
-    <!-- Modal: PIN Password for Teacher Mode (PIN: 1524) -->
+    <!-- Modal: Teacher Cloud Login -->
     <div id="pinModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="bg-slate-800 border border-amber-500/50 rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center">
             <h3 class="text-2xl font-bold gold-text mb-2">تسجيل دخول المعلم</h3>
-            <p id="pinModalNotice" class="text-slate-300 text-sm mb-4">الرجاء إدخال رمز المرور لتفعيل الصلاحيات:</p>
-            <input type="password" id="pinInput" onkeydown="if(event.key==='Enter') verifyPin()" placeholder="أدخل رمز المرور..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-center tracking-widest text-lg mb-4 focus:outline-none focus:border-amber-500">
+            <p id="pinModalNotice" class="text-slate-300 text-sm mb-4">أدخل البريد الإلكتروني وكلمة المرور المسجلين في Firebase:</p>
+            <input type="email" id="teacherEmailInput" value="a.mabdelghanyas@gmail.com" placeholder="البريد الإلكتروني للمعلم..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-amber-300 text-center text-sm mb-3 focus:outline-none focus:border-amber-500" dir="ltr">
+            <input type="password" id="pinInput" onkeydown="if(event.key==='Enter') verifyPin()" placeholder="كلمة المرور السحابية..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-center tracking-widest text-lg mb-4 focus:outline-none focus:border-amber-500" dir="ltr">
             <div class="flex justify-center gap-3">
                 <button type="button" onclick="closePinModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl transition">إلغاء</button>
                 <button type="button" onclick="verifyPin()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-6 py-2 rounded-xl transition">دخول</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Change Teacher Password -->
+    <div id="changePasswordModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-amber-500/50 rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center">
+            <h3 class="text-2xl font-bold gold-text mb-2">🔑 تغيير كلمة مرور المعلم</h3>
+            <p class="text-slate-300 text-xs mb-4">سيتم تحديث كلمة المرور مباشرة في حسابك السحابي على Firebase:</p>
+            
+            <input type="password" id="currentPassInput" placeholder="كلمة المرور الحالية..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-center text-sm mb-3 focus:outline-none focus:border-amber-500" dir="ltr">
+            
+            <input type="password" id="newPassInput" placeholder="كلمة المرور الجديدة (6 خانات فأكثر)..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-amber-300 text-center text-sm mb-3 focus:outline-none focus:border-amber-500" dir="ltr">
+            
+            <input type="password" id="confirmNewPassInput" onkeydown="if(event.key==='Enter') submitPasswordChange()" placeholder="تأكيد كلمة المرور الجديدة..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-amber-300 text-center text-sm mb-4 focus:outline-none focus:border-amber-500" dir="ltr">
+            
+            <div class="flex justify-center gap-3">
+                <button type="button" onclick="closeChangePasswordModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl transition">إلغاء</button>
+                <button type="button" onclick="submitPasswordChange()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2 rounded-xl transition">حفظ التغيير</button>
             </div>
         </div>
     </div>
@@ -890,10 +934,30 @@
         </div>
     </div>
 
-  <!-- Firebase SDK Imports & Realtime Listeners (Fixed & Protected) -->
+    <!-- Modal: Manage Classes (Add / Rename / Delete) -->
+    <div id="classesManageModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-teal-500/50 rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 class="text-2xl font-bold text-teal-400 mb-2">🏫 إدارة الفصول الدراسية</h3>
+            <p class="text-slate-400 text-sm mb-4">يمكنك تعديل أسماء الفصول الحالية أو إضافة فصول جديدة للمنصة:</p>
+
+            <div class="flex gap-2 mb-5 bg-slate-900/80 p-3 rounded-xl border border-teal-500/30">
+                <input type="text" id="newClassNameInput" onkeydown="if(event.key==='Enter') addNewClassItem()" placeholder="اكتب اسم الفصل الجديد (مثال: Diamond أو 2/A)..." class="flex-1 bg-slate-950 border border-slate-700 px-4 py-2 rounded-xl text-white text-sm focus:outline-none focus:border-teal-400">
+                <button type="button" onclick="addNewClassItem()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-4 py-2 rounded-xl transition text-sm whitespace-nowrap">➕ إضافة فصل</button>
+            </div>
+
+            <div id="classesListManageContainer" class="space-y-2.5 max-h-64 overflow-y-auto bg-slate-900/60 p-3 rounded-xl border border-slate-700 mb-4"></div>
+
+            <div class="flex justify-end pt-3 border-t border-slate-700">
+                <button type="button" onclick="closeClassesManageModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-6 py-2 rounded-xl transition">حفظ وإغلاق</button>
+            </div>
+        </div>
+    </div>
+
+ <!-- Firebase SDK Imports & Realtime Listeners + Cloud Auth -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAHbCkb61MrSSIl0EjnX2r76t4xJd1cKe0",
@@ -908,12 +972,39 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app);
 
-        // قفل أمان يمنع أي جهاز جديد من الكتابة فوق السحابة قبل تحميل البيانات منها أولاً
+        // مراقبة حالة تسجيل دخول المعلم تلقائياً من السحابة
+        onAuthStateChanged(auth, (user) => {
+            window.isTeacherAuthenticated = Boolean(user);
+            if (typeof window.syncTeacherAuthState === 'function') {
+                window.syncTeacherAuthState(Boolean(user));
+            }
+        });
+
+        // دالة تسجيل الدخول السحابي بالبريد الإلكتروني وكلمة المرور
+        window.cloudTeacherLogin = async function(email, password) {
+            return await signInWithEmailAndPassword(auth, email, password);
+        };
+
+        // دالة تسجيل الخروج السحابي
+        window.cloudTeacherLogout = async function() {
+            return await signOut(auth);
+        };
+
+        // دالة تغيير كلمة المرور السحابية من داخل المنصة
+        window.cloudChangePassword = async function(currentPassword, newPassword) {
+            const user = auth.currentUser;
+            if (!user) throw new Error("not-logged-in");
+            const credential = EmailAuthProvider.credential(user.email, currentPassword);
+            await reauthenticateWithCredential(user, credential);
+            await updatePassword(user, newPassword);
+        };
+
         window.isCloudReady = false;
 
         window.cloudSave = async function(key, val) {
-            if (!window.isCloudReady) return; // منع الكتابة العكسية أثناء التحميل الأولي
+            if (!window.isCloudReady) return;
             try {
                 const dbRef = ref(db, 'app_data/' + key);
                 const strVal = typeof val === 'string' ? val : JSON.stringify(val);
@@ -925,7 +1016,6 @@
 
         function initRealtimeListeners() {
             const dbRef = ref(db, 'app_data');
-            
             onValue(dbRef, (snapshot) => {
                 if (snapshot.exists()) {
                     try {
@@ -934,30 +1024,24 @@
                             if (Object.prototype.hasOwnProperty.call(allData, key)) {
                                 const val = allData[key];
                                 const str = typeof val === 'string' ? val : JSON.stringify(val);
-                                if (window.localStorage) {
-                                    window.localStorage.setItem(key, str);
-                                }
-                                if (typeof memoryFallback !== 'undefined') {
-                                    memoryFallback[key] = str;
-                                }
+                                if (window.localStorage) window.localStorage.setItem(key, str);
+                                if (typeof memoryFallback !== 'undefined') memoryFallback[key] = str;
                             }
                         }
                     } catch (e) {
                         console.error("Error parsing realtime data:", e);
                     }
                 }
-                
-                // فتح قفل الحفظ السحابي بعد استلام النسخة السحابية بنجاح
                 window.isCloudReady = true;
 
                 if (typeof renderHeader === 'function') renderHeader();
+                if (typeof renderClassesBar === 'function') renderClassesBar();
                 if (typeof renderWeekSelect === 'function') renderWeekSelect();
                 if (typeof renderDailyWeekSelect === 'function') renderDailyWeekSelect();
                 if (typeof renderSummarySelect === 'function') renderSummarySelect();
                 if (typeof renderCertificateStudentSelect === 'function') renderCertificateStudentSelect();
                 if (typeof refreshCurrentView === 'function') refreshCurrentView();
 
-                // إظهار منصة التتويج بعد التأكد من وصول النجوم الحقيقية من السحابة
                 if (!sessionStorage.getItem('welcome_shown') && typeof showWelcomeTopStudents === 'function') {
                     showWelcomeTopStudents();
                     sessionStorage.setItem('welcome_shown', 'true');
@@ -1054,9 +1138,6 @@
 
         // --- 2. State & Defaults ---
         let isTeacherMode = false;
-        try {
-            isTeacherMode = sessionStorage.getItem('honor_teacher_active') === '1';
-        } catch (e) {}
 
         let currentClass = 'jade';
         let currentFilter = 'all';
@@ -1068,7 +1149,6 @@
         let currentSeatingLayout = 'islands';
         let selectedSeatStudent = null;
         let highlightedWinnerStudent = null;
-        const TEACHER_PIN = "1524";
 
         const defaultRosters = {
             jade: ["يوسف أحمد محمود", "فاطمة محمد إبراهيم", "زياد خالد حسن", "هنا عمر سعيد", "عبد الرحمن طارق", "مريم وائل سمير", "عمر تامر فؤاد", "نور الدين سامح"],
@@ -1092,6 +1172,27 @@
         };
 
         // --- 3. Data Accessors ---
+        const defaultClassesList = [
+            { id: 'jade', name: 'Jade' },
+            { id: 'crystal', name: 'Crystal' },
+            { id: 'opal', name: 'Opal' }
+        ];
+
+        function getClassesList() {
+            const list = safeGet('app_classes_list', defaultClassesList, 'array');
+            return list.length > 0 ? list : cloneDefault(defaultClassesList);
+        }
+
+        function saveClassesList(list) {
+            safeSet('app_classes_list', list);
+        }
+
+        function getCurrentClassDisplayName(classId = currentClass) {
+            const list = getClassesList();
+            const found = list.find(c => c.id === classId);
+            return found ? found.name : String(classId).toUpperCase();
+        }
+
         function getHeaderData() {
             return safeGet('board_header_data', {
                 subject: "مادة اللغة العربية",
@@ -1179,16 +1280,48 @@
                         }
                     });
 
-                    existing.count = Object.values(existing.catCounts).reduce((a, b) => a + b, 0);
+                   existing.count = Object.values(existing.catCounts).reduce((a, b) => a + b, 0);
                     existing.reason = existing.honorsList.map(h => `${getCategoryMedalMeta(h.category).icon} ${h.reason}`).join(' ✦ ');
                     if (item.photo && !existing.photo) {
                         existing.photo = item.photo;
                     }
                 }
             });
+
+            // إضافة تلقائية في "فرسان التفوق" لكل طالب حقق اللون الأزرق (85% - 100%)
+            const roster = getRoster();
+            roster.forEach(studentName => {
+                const stats = getStudentAcademicStats(studentName, currentClass);
+                if (stats.blueCount > 0) {
+                    const autoReason = `🔵 المستوى الأزرق في التقييمات (${stats.blueCount} تقييم متميز = +${stats.bonusStars} ⭐ إضافية)`;
+                    const key = studentName.trim();
+                    if (!mergedMap[key]) {
+                        const newEntry = {
+                            id: 'auto_blue_' + key,
+                            name: key,
+                            category: 'excellence',
+                            photo: '',
+                            count: stats.blueCount,
+                            catCounts: { excellence: stats.blueCount },
+                            honorsList: [{ category: 'excellence', reason: autoReason }],
+                            reason: `🏆 ${autoReason}`
+                        };
+                        mergedMap[key] = newEntry;
+                        result.push(newEntry);
+                    } else {
+                        const existing = mergedMap[key];
+                        if (!existing.honorsList.some(h => h.reason === autoReason)) {
+                            existing.catCounts['excellence'] = (existing.catCounts['excellence'] || 0) + stats.blueCount;
+                            existing.count = Object.values(existing.catCounts).reduce((a, b) => a + b, 0);
+                            existing.honorsList.push({ category: 'excellence', reason: autoReason });
+                            existing.reason = existing.honorsList.map(h => `${getCategoryMedalMeta(h.category).icon} ${h.reason}`).join(' ✦ ');
+                        }
+                    }
+                }
+            });
+
             return result;
         }
-
         function getStudentHonorCount(studentName) {
             const honors = getHonorStudents().filter(h => h.name === studentName);
             return honors.reduce((sum, h) => sum + (h.count || 1), 0);
@@ -1239,7 +1372,10 @@
             const roster = getRoster();
             roster.forEach(name => {
                 if (!tracker[name] || typeof tracker[name] !== 'object') {
-                    tracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, prize: "" };
+                    tracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, hw: false, quiz: "", prize: "" };
+                } else {
+                    if (tracker[name].hw === undefined) tracker[name].hw = false;
+                    if (tracker[name].quiz === undefined) tracker[name].quiz = "";
                 }
             });
             return tracker;
@@ -1254,10 +1390,217 @@
             const roster = getRoster();
             roster.forEach(name => {
                 if (!tracker[name] || typeof tracker[name] !== 'object') {
-                    tracker[name] = { p1: false, p2: false, p3: false, p4: false, p5: false };
+                    tracker[name] = { att: 'present', p1: false, p2: false, p3: false, p4: false, p5: false };
+                } else if (!tracker[name].att) {
+                    tracker[name].att = 'present';
                 }
             });
             return tracker;
+        }
+
+        // حفظ واسترجاع الدرجة الكلية للتقييم الأسبوعي واختبار الشهر
+        function getWeeklyMaxScore(weekId = currentWeek, cls = currentClass) {
+            const wTracker = safeGet(`weekly_tracker_${cls}_${weekId}`, {}, 'object');
+            const max = parseFloat(wTracker._maxQuiz);
+            return (!isNaN(max) && max > 0) ? max : 10;
+        }
+
+        function updateWeeklyMaxQuiz(val) {
+            if (!requireTeacherOrPrompt()) {
+                renderTrackerTable();
+                return;
+            }
+            const max = parseFloat(val);
+            if (isNaN(max) || max <= 0) return;
+            const tracker = getWeeklyTracker(currentWeek);
+            tracker._maxQuiz = max;
+            saveWeeklyTracker(currentWeek, tracker);
+            renderTrackerTable();
+        }
+
+        function getMonthlyMaxScore(monthId = currentMonth, cls = currentClass) {
+            const mTracker = safeGet(`monthly_data_${cls}_${monthId}`, {}, 'object');
+            const max = parseFloat(mTracker._maxExam);
+            return (!isNaN(max) && max > 0) ? max : 20;
+        }
+
+        function updateMonthlyMaxExam(val) {
+            if (!requireTeacherOrPrompt()) {
+                renderMonthlyTable();
+                return;
+            }
+            const max = parseFloat(val);
+            if (isNaN(max) || max <= 0) return;
+            const tracker = getMonthlyData();
+            tracker._maxExam = max;
+            saveMonthlyData(tracker);
+            renderMonthlyTable();
+        }
+
+        // حساب النسبة المئوية بقسمة درجة الطالب على الدرجة الكلية المحددة
+        function calcScorePercentage(studentScore, maxScore) {
+            if (studentScore === undefined || studentScore === null || String(studentScore).trim() === '') return null;
+            const str = String(studentScore).trim();
+            // دعم إضافي لو كُتبت الدرجة بكسر مباشر مثل 9/10
+            if (str.includes('/')) {
+                const parts = str.split('/');
+                const n = parseFloat(parts[0]);
+                const d = parseFloat(parts[1]);
+                if (!isNaN(n) && !isNaN(d) && d > 0) return Math.min(100, Math.max(0, (n / d) * 100));
+            }
+            const num = parseFloat(str);
+            const max = parseFloat(maxScore) || 10;
+            if (isNaN(num) || max <= 0) return null;
+            return Math.min(100, Math.max(0, (num / max) * 100));
+        }
+
+        // تحديد اللون والمستوى والنجوم الـ 3 الإضافية حسب النسبة المئوية
+        function getGradeColorMeta(percentage) {
+            if (percentage === null || percentage === undefined || isNaN(percentage)) {
+                return {
+                    key: 'none',
+                    label: 'لم يُرصد',
+                    dot: '⚪',
+                    pctText: '',
+                    bonusStars: 0,
+                    badgeClass: 'bg-slate-800 text-slate-400 border-slate-700',
+                    inputClass: 'bg-slate-900 border-slate-700 text-white'
+                };
+            }
+            const pctRound = Math.round(percentage);
+            if (percentage >= 85) {
+                return {
+                    key: 'blue',
+                    label: 'الأزرق (85% - 100%)',
+                    dot: '🔵',
+                    pctText: `${pctRound}%`,
+                    bonusStars: 3, // 3 نجوم إضافية للتفوق
+                    badgeClass: 'bg-sky-500/20 text-sky-300 border-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.3)]',
+                    inputClass: 'bg-sky-950/80 border-sky-400 text-sky-200'
+                };
+            } else if (percentage >= 65) {
+                return {
+                    key: 'green',
+                    label: 'الأخضر (65% - 84%)',
+                    dot: '🟢',
+                    pctText: `${pctRound}%`,
+                    bonusStars: 0,
+                    badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-400',
+                    inputClass: 'bg-emerald-950/80 border-emerald-400 text-emerald-200'
+                };
+            } else if (percentage >= 50) {
+                return {
+                    key: 'yellow',
+                    label: 'الأصفر (50% - 64%)',
+                    dot: '🟡',
+                    pctText: `${pctRound}%`,
+                    bonusStars: 0,
+                    badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-400',
+                    inputClass: 'bg-amber-950/80 border-amber-400 text-amber-200'
+                };
+            } else {
+                return {
+                    key: 'red',
+                    label: 'الأحمر (أقل من 50%)',
+                    dot: '🔴',
+                    pctText: `${pctRound}%`,
+                    bonusStars: 0,
+                    badgeClass: 'bg-rose-500/20 text-rose-300 border-rose-400',
+                    inputClass: 'bg-rose-950/80 border-rose-400 text-rose-200'
+                };
+            }
+        }
+
+        // دالة لحساب إحصائيات الحضور والواجبات والتقييمات واختبارات الشهور والنجوم الإضافية للطالب
+        function getStudentAcademicStats(studentName, targetClass = currentClass) {
+            let default16 = [];
+            for (let i = 1; i <= 16; i++) default16.push(`week${i}`);
+            const weeks = safeGet(`weeks_list_${targetClass}`, default16, 'array');
+            const validWeeks = weeks.length > 0 ? weeks : default16;
+
+            const days = ['sun', 'mon', 'tue', 'wed', 'thu'];
+            const months = ['month1', 'month2', 'month3', 'month4', 'month5', 'month6', 'month7', 'month8'];
+            let absentDays = 0;
+            let excusedDays = 0;
+            let hwCompleted = 0;
+            let quizPercentages = [];
+            let examPercentages = [];
+            let bonusStars = 0;
+            let blueCount = 0;
+
+            validWeeks.forEach(w => {
+                const wTracker = safeGet(`weekly_tracker_${targetClass}_${w}`, {}, 'object');
+                const maxQuiz = parseFloat(wTracker._maxQuiz) > 0 ? parseFloat(wTracker._maxQuiz) : 10;
+                const wSt = wTracker[studentName];
+                if (wSt) {
+                    if (wSt.hw) hwCompleted++;
+                    const pct = calcScorePercentage(wSt.quiz, maxQuiz);
+                    if (pct !== null) {
+                        quizPercentages.push(pct);
+                        if (pct >= 85) {
+                            bonusStars += 3;
+                            blueCount++;
+                        }
+                    }
+                }
+                days.forEach(d => {
+                    const dTracker = safeGet(`daily_tracker_${targetClass}_${w}_${d}`, {}, 'object');
+                    const dSt = dTracker[studentName];
+                    if (dSt && dSt.att === 'absent') absentDays++;
+                    else if (dSt && dSt.att === 'excused') excusedDays++;
+                });
+            });
+
+            months.forEach(m => {
+                const mTracker = safeGet(`monthly_data_${targetClass}_${m}`, {}, 'object');
+                const maxExam = parseFloat(mTracker._maxExam) > 0 ? parseFloat(mTracker._maxExam) : 20;
+                const mSt = mTracker[studentName];
+                if (mSt) {
+                    const pct = calcScorePercentage(mSt.exam, maxExam);
+                    if (pct !== null) {
+                        examPercentages.push(pct);
+                        if (pct >= 85) {
+                            bonusStars += 3;
+                            blueCount++;
+                        }
+                    }
+                }
+            });
+
+            const avgQuizPct = quizPercentages.length > 0
+                ? (quizPercentages.reduce((a, b) => a + b, 0) / quizPercentages.length)
+                : null;
+
+            const avgExamPct = examPercentages.length > 0
+                ? (examPercentages.reduce((a, b) => a + b, 0) / examPercentages.length)
+                : null;
+
+            const allPcts = [...quizPercentages, ...examPercentages];
+            const overallPct = allPcts.length > 0
+                ? (allPcts.reduce((a, b) => a + b, 0) / allPcts.length)
+                : null;
+
+            const quizColor = getGradeColorMeta(avgQuizPct);
+            const examColor = getGradeColorMeta(avgExamPct);
+            const overallColor = getGradeColorMeta(overallPct);
+
+            const avgQuiz = avgQuizPct !== null ? `${Math.round(avgQuizPct)}% (${quizColor.dot})` : 'لم يُرصد';
+            const avgExam = avgExamPct !== null ? `${Math.round(avgExamPct)}% (${examColor.dot})` : 'لم يُرصد';
+
+            const currentMTracker = safeGet(`monthly_data_${targetClass}_${currentMonth}`, {}, 'object');
+            const curMaxExam = parseFloat(currentMTracker._maxExam) > 0 ? parseFloat(currentMTracker._maxExam) : 20;
+            const rawCurrentExam = (currentMTracker[studentName] && currentMTracker[studentName].exam !== undefined && String(currentMTracker[studentName].exam).trim() !== '') ? currentMTracker[studentName].exam : '';
+            const currentExamPct = calcScorePercentage(rawCurrentExam, curMaxExam);
+            const currentExamColor = getGradeColorMeta(currentExamPct);
+            const currentMonthExam = rawCurrentExam !== '' ? `${rawCurrentExam} من ${curMaxExam} (${currentExamColor.dot} ${currentExamColor.pctText})` : 'لم يُرصد';
+
+            return {
+                absentDays, excusedDays, hwCompleted, totalWeeks: validWeeks.length,
+                avgQuiz, avgQuizPct, quizColor, quizCount: quizPercentages.length,
+                avgExam, avgExamPct, examColor, currentMonthExam,
+                overallPct, overallColor,
+                bonusStars, blueCount
+            };
         }
 
         function saveDailyTracker(weekId, dayId, tracker) {
@@ -1266,10 +1609,13 @@
 
         function getMonthlyData() {
             const tracker = safeGet(`monthly_data_${currentClass}_${currentMonth}`, {}, 'object');
+            if (!tracker._maxExam) tracker._maxExam = 20;
             const roster = getRoster();
             roster.forEach(name => {
                 if (!tracker[name] || typeof tracker[name] !== 'object') {
-                    tracker[name] = { eval: "", prize: "" };
+                    tracker[name] = { exam: "", eval: "", prize: "" };
+                } else if (tracker[name].exam === undefined) {
+                    tracker[name].exam = "";
                 }
             });
             return tracker;
@@ -1294,8 +1640,9 @@
             safeSet(`term_data_${currentClass}_${currentTerm}`, tracker);
         }
 
-        function calculateStudentTotalScore(studentName) {
-            let totalStars = 0;
+        // حساب نجوم الأيام فقط (بدون نجوم التقييمات الإضافية)
+        function calculateStudentDailyStarsOnly(studentName) {
+            let dailyStars = 0;
             const weeks = getAvailableWeeks();
             const days = ['sun', 'mon', 'tue', 'wed', 'thu'];
 
@@ -1304,15 +1651,22 @@
                     const dailyTracker = getDailyTracker(w, d);
                     const st = dailyTracker[studentName];
                     if (st) {
-                        if (st.p1) totalStars++;
-                        if (st.p2) totalStars++;
-                        if (st.p3) totalStars++;
-                        if (st.p4) totalStars++;
-                        if (st.p5) totalStars++;
+                        if (st.p1) dailyStars++;
+                        if (st.p2) dailyStars++;
+                        if (st.p3) dailyStars++;
+                        if (st.p4) dailyStars++;
+                        if (st.p5) dailyStars++;
                     }
                 });
             });
-            return totalStars;
+            return dailyStars;
+        }
+
+        // المجموع الكلي للنقاط (نجوم الأيام + 3 نجوم إضافية لكل تقييم/اختبار باللون الأزرق)
+        function calculateStudentTotalScore(studentName) {
+            const dailyStars = calculateStudentDailyStarsOnly(studentName);
+            const stats = getStudentAcademicStats(studentName, currentClass);
+            return dailyStars + (stats.bonusStars || 0);
         }
         function getStudentKnightRank(studentName) {
             const score = calculateStudentTotalScore(studentName);
@@ -1339,15 +1693,22 @@
                 const rank = getStudentKnightRank(name);
                 const group = getStudentGroupName(name);
                 const termPts = getStudentTermPoints(name);
+                const stats = getStudentAcademicStats(name);
 
                 exportData.push({
                     "اسم الطالب": name,
-                    "الفصل": currentClass.toUpperCase(),
+                    "الفصل": getCurrentClassDisplayName(),
                     "المجموعة": group,
+                    "أيام الغياب": stats.absentDays,
+                    "أيام الاستئذان": stats.excusedDays,
+                    "الواجبات المسلمة": `${stats.hwCompleted} من ${stats.totalWeeks}`,
+                    "متوسط التقييم الأسبوعي": stats.avgQuiz,
+                    "درجة اختبار الشهر الحالي": stats.currentMonthExam,
+                    "متوسط اختبارات الشهور": stats.avgExam,
                     "إجمالي النجوم الفردية": totalStars,
                     "رتبة الفارس": rank.title,
                     "نجوم حصاد الترم (من 400)": termPts,
-                    "مادة الدراسات / المادة": header.subject
+                    "المادة": header.subject
                 });
             });
 
@@ -1355,7 +1716,7 @@
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Google_Classroom_Grades");
 
-            XLSX.writeFile(workbook, `Google_Classroom_Scores_${currentClass.toUpperCase()}_${new Date().toISOString().slice(0,10)}.xlsx`);
+            XLSX.writeFile(workbook, `Google_Classroom_Scores_${getCurrentClassDisplayName()}_${new Date().toISOString().slice(0,10)}.xlsx`);
             triggerConfetti({ particleCount: 50, spread: 70 });
         }
 
@@ -1403,7 +1764,7 @@
         function requireTeacherOrPrompt() {
             if (isTeacherMode) return true;
             const notice = document.getElementById('pinModalNotice');
-            if (notice) notice.innerText = "يرجى إدخال رمز المعلم (1524) لتفعيل التعديل وإعطاء النجوم:";
+           if (notice) notice.innerText = "يرجى إدخال كلمة مرور المعلم لتفعيل التعديل وإعطاء النجوم:";
             document.getElementById('pinModal').classList.remove('hidden');
             document.getElementById('pinModal').classList.add('flex');
             const input = document.getElementById('pinInput');
@@ -1533,8 +1894,10 @@
 
                 grp.members.forEach(memberName => {
                     if (!dailyTracker[memberName]) {
-                        dailyTracker[memberName] = { p1: false, p2: false, p3: false, p4: false, p5: false };
+                        dailyTracker[memberName] = { att: 'present', p1: false, p2: false, p3: false, p4: false, p5: false };
                     }
+                    // إذا كان الطالب غائباً اليوم لا يأخذ نجمة المجموعة
+                    if (dailyTracker[memberName].att === 'absent') return;
                     dailyTracker[memberName][pointKey] = newState;
 
                     const st = dailyTracker[memberName];
@@ -1900,7 +2263,7 @@
                                 <div style="background: linear-gradient(90deg, #78350f, #b45309, #78350f); color: #fef3c7; padding: 4px 18px; border-radius: 999px; font-size: 13px; box-shadow: 0 2px 8px rgba(120,53,15,0.3);">
                                     ${badgeTitle} (${rank.title})
                                 </div>
-                                <div>الصف الثاني الإعدادي — فصل (${currentClass.toUpperCase()})</div>
+                                <div>الصف الثاني الإعدادي — فصل (${getCurrentClassDisplayName()})</div>
                             </div>
 
                             <!-- Main Royal Title -->
@@ -2010,7 +2373,7 @@
                         </p>
                     </div>
                     <div style="text-align: left; font-size: 12px; font-weight: 700; color: #1e293b; border: 1.5px solid #0f172a; padding: 6px 12px; border-radius: 8px;">
-                        <div>الفصل: ${currentClass.toUpperCase()}</div>
+                        <div>الفصل: ${getCurrentClassDisplayName()}</div>
                         <div>اليوم: ${dayNames[currentDailyDay] || ''} (${todayStr})</div>
                     </div>
                 </div>
@@ -2318,6 +2681,7 @@
 
         // --- 5. Backup Export & Import (Fixed) ---
         const VALID_APP_KEY_PREFIXES = [
+            'app_classes_list',
             'board_header_data',
             'dice_questions',
             'class_roster_',
@@ -2442,24 +2806,39 @@
             document.getElementById('headerModal').classList.add('hidden');
         }
 
+        function renderClassesBar() {
+            const container = document.getElementById('classesButtonsContainer');
+            if (!container) return;
+            const classes = getClassesList();
+            if (!classes.some(c => c.id === currentClass) && classes.length > 0) {
+                currentClass = classes[0].id;
+            }
+            container.innerHTML = '';
+            classes.forEach(c => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.id = `${c.id}Btn`;
+                btn.onclick = () => switchClass(c.id);
+                btn.className = c.id === currentClass
+                    ? "class-tab flex-1 min-w-[90px] py-2 px-4 rounded-xl font-bold bg-amber-500 text-slate-900 shadow transition"
+                    : "class-tab flex-1 min-w-[90px] py-2 px-4 rounded-xl font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition";
+                btn.textContent = c.name;
+                container.appendChild(btn);
+            });
+
+            document.querySelectorAll('.currentClassNameDisplay').forEach(el => {
+                el.innerText = getCurrentClassDisplayName(currentClass);
+            });
+        }
+
         function switchClass(className) {
             currentClass = className;
             currentFilter = 'all';
             selectedSeatStudent = null;
             const weeks = getAvailableWeeks();
             currentWeek = weeks[0];
-            document.querySelectorAll('.currentClassNameDisplay').forEach(el => {
-                el.innerText = currentClass.toUpperCase();
-            });
-            
-            ['jade', 'crystal', 'opal'].forEach(c => {
-                const btn = document.getElementById(`${c}Btn`);
-                if (btn) {
-                    btn.className = c === className
-                        ? "class-tab flex-1 py-2 px-4 rounded-xl font-bold bg-amber-500 text-slate-900 shadow transition"
-                        : "class-tab flex-1 py-2 px-4 rounded-xl font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition";
-                }
-            });
+
+            renderClassesBar();
 
             document.querySelectorAll('.category-btn').forEach((btn, idx) => {
                 btn.className = idx === 0
@@ -2474,6 +2853,86 @@
             renderSummarySelect();
             renderCertificateStudentSelect();
             refreshCurrentView();
+        }
+
+        function openClassesManageModal() {
+            if (!requireTeacherOrPrompt()) return;
+            renderClassesManageList();
+            document.getElementById('classesManageModal').classList.remove('hidden');
+            document.getElementById('classesManageModal').classList.add('flex');
+        }
+
+        function closeClassesManageModal() {
+            document.getElementById('classesManageModal').classList.remove('flex');
+            document.getElementById('classesManageModal').classList.add('hidden');
+            renderClassesBar();
+            refreshCurrentView();
+        }
+
+        function renderClassesManageList() {
+            const container = document.getElementById('classesListManageContainer');
+            if (!container) return;
+            const classes = getClassesList();
+            container.innerHTML = '';
+
+            classes.forEach((cls, idx) => {
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between gap-2 bg-slate-800 p-2.5 rounded-xl border border-slate-700";
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 flex-1">
+                        <span class="text-teal-400 font-black text-xs">#${idx + 1}</span>
+                        <input type="text" value="${cls.name}" onchange="renameClassItem(${idx}, this.value)" class="bg-slate-900 border border-slate-600 rounded-lg px-3 py-1.5 text-white font-bold text-sm flex-1 focus:outline-none focus:border-amber-400">
+                    </div>
+                    ${classes.length > 1 ? `<button type="button" onclick="deleteClassItem(${idx})" class="bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition">🗑️ حذف</button>` : ''}
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addNewClassItem() {
+            if (!requireTeacherOrPrompt()) return;
+            const input = document.getElementById('newClassNameInput');
+            const name = input ? input.value.trim() : '';
+            if (!name) return;
+
+            const classes = getClassesList();
+            const newId = 'cls_' + Date.now();
+            classes.push({ id: newId, name: name });
+            saveClassesList(classes);
+            input.value = '';
+            renderClassesManageList();
+            renderClassesBar();
+        }
+
+        function renameClassItem(idx, newName) {
+            if (!requireTeacherOrPrompt()) return;
+            const trimmed = newName.trim();
+            if (!trimmed) return;
+            const classes = getClassesList();
+            if (classes[idx]) {
+                classes[idx].name = trimmed;
+                saveClassesList(classes);
+                renderClassesBar();
+            }
+        }
+
+        function deleteClassItem(idx) {
+            if (!requireTeacherOrPrompt()) return;
+            const classes = getClassesList();
+            if (classes.length <= 1) {
+                alert("لا يمكن حذف جميع الفصول! يجب بقاء فصل واحد على الأقل.");
+                return;
+            }
+            const target = classes[idx];
+            if (confirm(`هل أنت متأكد من حذف فصل "${target.name}" من قائمة الفصول؟`)) {
+                classes.splice(idx, 1);
+                saveClassesList(classes);
+                if (currentClass === target.id) {
+                    currentClass = classes[0].id;
+                }
+                renderClassesManageList();
+                switchClass(currentClass);
+            }
         }
 
         function switchView(view) {
@@ -2523,14 +2982,21 @@
         }
 
         // --- 7. Teacher Mode & PIN ---
-        function toggleTeacherMode() {
+        window.syncTeacherAuthState = function(isLoggedIn) {
+            isTeacherMode = isLoggedIn;
+            updateTeacherUI();
+        };
+
+        async function toggleTeacherMode() {
             if (isTeacherMode) {
+                if (typeof window.cloudTeacherLogout === 'function') {
+                    await window.cloudTeacherLogout();
+                }
                 isTeacherMode = false;
-                try { sessionStorage.removeItem('honor_teacher_active'); } catch (e) {}
                 updateTeacherUI();
             } else {
                 const notice = document.getElementById('pinModalNotice');
-                if (notice) notice.innerText = "الرجاء إدخال رمز المرور لتفعيل الصلاحيات:";
+                if (notice) notice.innerText = "أدخل البريد الإلكتروني وكلمة المرور المسجلين في Firebase:";
                 document.getElementById('pinModal').classList.remove('hidden');
                 document.getElementById('pinModal').classList.add('flex');
                 const input = document.getElementById('pinInput');
@@ -2541,16 +3007,83 @@
             }
         }
 
-        function verifyPin() {
+        async function verifyPin() {
+            const emailEl = document.getElementById('teacherEmailInput');
+            const enteredEmail = emailEl ? emailEl.value.trim() : '';
             const enteredPin = document.getElementById('pinInput').value.trim();
-            if (enteredPin === TEACHER_PIN) {
+
+            if (!enteredEmail || !enteredPin) {
+                alert("يرجى إدخال البريد الإلكتروني وكلمة المرور!");
+                return;
+            }
+
+            try {
+                await window.cloudTeacherLogin(enteredEmail, enteredPin);
                 isTeacherMode = true;
-                try { sessionStorage.setItem('honor_teacher_active', '1'); } catch (e) {}
                 closePinModal();
                 updateTeacherUI();
                 triggerConfetti({ particleCount: 50, spread: 60, origin: { y: 0.1 } });
-            } else {
-                alert("رمز المرور غير صحيح!");
+            } catch (error) {
+                console.error("Auth Error:", error);
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                    alert("البريد الإلكتروني أو كلمة المرور غير مطابقة لما سجلته في قسم Users داخل Firebase!");
+                } else if (error.code === 'auth/invalid-email') {
+                    alert("صيغة البريد الإلكتروني غير صحيحة!");
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    alert("يرجى تفعيل خيار Email/Password داخل Firebase Authentication ثم الضغط على Save!");
+                } else {
+                    alert("خطأ في الاتصال بالسحابة: " + (error.code || error.message));
+                }
+            }
+        }
+
+        function openChangePasswordModal() {
+            if (!isTeacherMode) return;
+            document.getElementById('currentPassInput').value = '';
+            document.getElementById('newPassInput').value = '';
+            document.getElementById('confirmNewPassInput').value = '';
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+            document.getElementById('changePasswordModal').classList.add('flex');
+            document.getElementById('currentPassInput').focus();
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('flex');
+            document.getElementById('changePasswordModal').classList.add('hidden');
+        }
+
+        async function submitPasswordChange() {
+            const currentPass = document.getElementById('currentPassInput').value.trim();
+            const newPass = document.getElementById('newPassInput').value.trim();
+            const confirmPass = document.getElementById('confirmNewPassInput').value.trim();
+
+            if (!currentPass || !newPass || !confirmPass) {
+                alert("يرجى ملء جميع الحقول!");
+                return;
+            }
+            if (newPass.length < 6) {
+                alert("كلمة المرور الجديدة يجب ألا تقل عن 6 أحرف أو أرقام!");
+                return;
+            }
+            if (newPass !== confirmPass) {
+                alert("كلمة المرور الجديدة وتأكيدها غير متطابقين!");
+                return;
+            }
+
+            try {
+                await window.cloudChangePassword(currentPass, newPass);
+                closeChangePasswordModal();
+                triggerConfetti({ particleCount: 70, spread: 70 });
+                alert("✅ تم تغيير كلمة المرور في السحابة بنجاح!");
+            } catch (error) {
+                console.error("Password Change Error:", error);
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+                    alert("❌ كلمة المرور الحالية غير صحيحة!");
+                } else if (error.code === 'auth/weak-password') {
+                    alert("⚠️ كلمة المرور الجديدة ضعيفة جداً، يرجى اختيار كلمة أقوى.");
+                } else {
+                    alert("حدث خطأ أثناء تحديث كلمة المرور: " + (error.code || error.message));
+                }
             }
         }
 
@@ -2562,9 +3095,10 @@
         function updateTeacherUI() {
             const btn = document.getElementById('teacherBtn');
             const toggleIds = [
-                'addStudentBtn', 'rosterBtn', 'settingsHeaderBtn', 'resetStorageBtn',
+                'addStudentBtn', 'rosterBtn', 'manageClassesBtn', 'settingsHeaderBtn', 'resetStorageBtn',
                 'addWeekBtn', 'clearAllWeeklyBtn', 'exportBtn', 'importBtnLabel',
-                'thActionCol', 'diceEditorBtn', 'teacherGroupsControls', 'classroomExportBtn'
+                'thActionCol', 'diceEditorBtn', 'teacherGroupsControls', 'classroomExportBtn',
+                'changePassBtn'
             ];
 
             if (isTeacherMode) {
@@ -2734,7 +3268,7 @@
                             <span class="text-xs font-bold px-3 py-1 rounded-full border shadow-sm bg-amber-500/15 text-amber-300 border-amber-500/30">
                                 ${item.isRankCard ? `✨ ${rank.badge}` : `🎖️ إجمالي الأوسمة: ${totalStudentHonors}`}
                             </span>
-                            ${isTeacherMode && !item.isRankCard ? `
+                            ${isTeacherMode && !item.isRankCard && !String(item.id).startsWith('auto_blue_') ? `
                                 <div class="flex gap-1.5 bg-slate-900/90 p-1.5 rounded-xl border border-slate-700 shadow">
                                     <button type="button" onclick="openAddModal(${item.id})" class="text-amber-400 hover:text-amber-300 bg-amber-500/10 p-1.5 rounded-lg transition" title="تعديل">✏️</button>
                                     <button type="button" onclick="deleteHonorStudent(${item.id})" class="text-rose-400 hover:text-rose-300 bg-rose-500/10 p-1.5 rounded-lg transition" title="حذف">🗑️</button>
@@ -2858,36 +3392,81 @@
             tbody.innerHTML = '';
 
             if (roster.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">لا توجد أسماء طلاب مسجلة. أضفهم عبر "إدارة الفصل".</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-slate-400">لا توجد أسماء طلاب مسجلة. أضفهم عبر "إدارة الفصل".</td></tr>`;
                 return;
             }
 
             roster.forEach((name, rIdx) => {
-                const st = dailyTracker[name] || { p1: false, p2: false, p3: false, p4: false, p5: false };
+                const st = dailyTracker[name] || { att: 'present', p1: false, p2: false, p3: false, p4: false, p5: false };
+                const attStatus = st.att || 'present';
+                const isAbsent = attStatus === 'absent';
                 const sum = (st.p1 ? 1 : 0) + (st.p2 ? 1 : 0) + (st.p3 ? 1 : 0) + (st.p4 ? 1 : 0) + (st.p5 ? 1 : 0);
                 const grpName = getStudentGroupName(name);
                 const rank = getStudentKnightRank(name);
 
+                let attBadge = `<span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-3 py-1 rounded-xl text-xs font-bold">✅ حاضر</span>`;
+                if (attStatus === 'absent') {
+                    attBadge = `<span class="bg-rose-500/20 text-rose-300 border border-rose-500/40 px-3 py-1 rounded-xl text-xs font-bold">❌ غائب</span>`;
+                } else if (attStatus === 'excused') {
+                    attBadge = `<span class="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-1 rounded-xl text-xs font-bold">⏳ مستأذن</span>`;
+                }
+
                 const row = document.createElement('tr');
-                row.className = "hover:bg-slate-900/40 transition";
+                row.className = `hover:bg-slate-900/40 transition ${isAbsent ? 'opacity-60 bg-rose-950/20' : ''}`;
                 row.innerHTML = `
                     <td class="p-3.5 font-bold text-white">
                         ${name}
                         <span class="text-[10px] text-amber-400 block font-normal">${rank.badge}</span>
                     </td>
                     <td class="p-3.5 text-center"><span class="text-xs bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full font-semibold">${grpName}</span></td>
+                    <td class="p-3.5 text-center">
+                        <button type="button" onclick="toggleDailyAttendanceByIndex(${rIdx})" class="transition transform hover:scale-105" title="اضغط لتغيير حالة الحضور">
+                            ${attBadge}
+                        </button>
+                    </td>
                     <td class="p-3.5 text-center"><button type="button" onclick="toggleDailyStarByIndex(${rIdx}, 'p1')" class="star-btn">${st.p1 ? '⭐' : '⚪'}</button></td>
                     <td class="p-3.5 text-center"><button type="button" onclick="toggleDailyStarByIndex(${rIdx}, 'p2')" class="star-btn">${st.p2 ? '⭐' : '⚪'}</button></td>
                     <td class="p-3.5 text-center"><button type="button" onclick="toggleDailyStarByIndex(${rIdx}, 'p3')" class="star-btn">${st.p3 ? '⭐' : '⚪'}</button></td>
                     <td class="p-3.5 text-center"><button type="button" onclick="toggleDailyStarByIndex(${rIdx}, 'p4')" class="star-btn">${st.p4 ? '⭐' : '⚪'}</button></td>
                     <td class="p-3.5 text-center"><button type="button" onclick="toggleDailyStarByIndex(${rIdx}, 'p5')" class="star-btn">${st.p5 ? '⭐' : '⚪'}</button></td>
                     <td class="p-3.5 text-center font-black text-amber-400 text-lg">${sum} / 5 ⭐</td>
-                    <td class="p-3.5 text-center font-bold ${sum === 5 ? 'text-emerald-400' : 'text-slate-400'}">
-                        ${sum === 5 ? '✅ اكتمل اليوم' : '⏳ قيد التجميع'}
+                    <td class="p-3.5 text-center font-bold ${isAbsent ? 'text-rose-400' : (sum === 5 ? 'text-emerald-400' : 'text-slate-400')}">
+                        ${isAbsent ? '❌ غائب اليوم' : (sum === 5 ? '✅ اكتمل اليوم' : '⏳ قيد التجميع')}
                     </td>
                 `;
                 tbody.appendChild(row);
             });
+        }
+
+        function toggleDailyAttendanceByIndex(rIdx) {
+            if (!requireTeacherOrPrompt()) return;
+            const roster = getRoster();
+            const name = roster[rIdx];
+            if (!name) return;
+
+            const dailyTracker = getDailyTracker(currentWeek, currentDailyDay);
+            if (!dailyTracker[name]) dailyTracker[name] = { att: 'present', p1: false, p2: false, p3: false, p4: false, p5: false };
+
+            const currentAtt = dailyTracker[name].att || 'present';
+            const nextAtt = currentAtt === 'present' ? 'absent' : (currentAtt === 'absent' ? 'excused' : 'present');
+            dailyTracker[name].att = nextAtt;
+
+            if (nextAtt === 'absent') {
+                dailyTracker[name].p1 = false;
+                dailyTracker[name].p2 = false;
+                dailyTracker[name].p3 = false;
+                dailyTracker[name].p4 = false;
+                dailyTracker[name].p5 = false;
+
+                const weeklyTracker = getWeeklyTracker(currentWeek);
+                if (weeklyTracker[name]) {
+                    weeklyTracker[name][currentDailyDay] = false;
+                    saveWeeklyTracker(currentWeek, weeklyTracker);
+                }
+            }
+
+            saveDailyTracker(currentWeek, currentDailyDay, dailyTracker);
+            renderDailyTable();
         }
 
         function toggleDailyStarByIndex(rIdx, pointKey) {
@@ -2897,7 +3476,13 @@
             if (!name) return;
 
             const dailyTracker = getDailyTracker(currentWeek, currentDailyDay);
-            if (!dailyTracker[name]) dailyTracker[name] = { p1: false, p2: false, p3: false, p4: false, p5: false };
+            if (!dailyTracker[name]) dailyTracker[name] = { att: 'present', p1: false, p2: false, p3: false, p4: false, p5: false };
+
+            if (dailyTracker[name].att === 'absent') {
+                alert("⚠️ هذا الطالب مسجل (غائب) اليوم! يرجى تغيير حالته إلى (حاضر) أولاً لإعطائه نجوماً.");
+                return;
+            }
+
             dailyTracker[name][pointKey] = !dailyTracker[name][pointKey];
             saveDailyTracker(currentWeek, currentDailyDay, dailyTracker);
 
@@ -2905,7 +3490,7 @@
             const sum = (st.p1 ? 1 : 0) + (st.p2 ? 1 : 0) + (st.p3 ? 1 : 0) + (st.p4 ? 1 : 0) + (st.p5 ? 1 : 0);
             
             const weeklyTracker = getWeeklyTracker(currentWeek);
-            if (!weeklyTracker[name]) weeklyTracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, prize: "" };
+            if (!weeklyTracker[name]) weeklyTracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, hw: false, quiz: "", prize: "" };
             weeklyTracker[name][currentDailyDay] = (sum === 5);
             saveWeeklyTracker(currentWeek, weeklyTracker);
 
@@ -2918,17 +3503,23 @@
             const name = roster[rIdx];
             if (!name) return;
 
+            const dailyTracker = getDailyTracker(currentWeek, dayKey);
+            if (dailyTracker[name] && dailyTracker[name].att === 'absent') {
+                alert("⚠️ هذا الطالب مسجل (غائب) في هذا اليوم! يرجى تعديل حالته من المتابعة اليومية أولاً.");
+                return;
+            }
+
             const weeklyTracker = getWeeklyTracker(currentWeek);
             if (!weeklyTracker[name]) {
-                weeklyTracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, prize: "" };
+                weeklyTracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, hw: false, quiz: "", prize: "" };
             }
             const newState = !weeklyTracker[name][dayKey];
             weeklyTracker[name][dayKey] = newState;
             saveWeeklyTracker(currentWeek, weeklyTracker);
 
-            // مزامنة النجوم الخمس في الجدول اليومي ليسمع في المجموع الكلي ومنصة التتويج
-            const dailyTracker = getDailyTracker(currentWeek, dayKey);
-            dailyTracker[name] = { p1: newState, p2: newState, p3: newState, p4: newState, p5: newState };
+            // مزامنة النجوم الخمس في الجدول اليومي مع الحفاظ على حالة الحضور/الاستئذان
+            const prevAtt = (dailyTracker[name] && dailyTracker[name].att) ? dailyTracker[name].att : 'present';
+            dailyTracker[name] = { att: prevAtt, p1: newState, p2: newState, p3: newState, p4: newState, p5: newState };
             saveDailyTracker(currentWeek, dayKey, dailyTracker);
 
             renderTrackerTable();
@@ -2957,28 +3548,40 @@
             if (!tbody) return;
             const roster = getRoster();
             const tracker = getWeeklyTracker(currentWeek);
+            const maxQuiz = getWeeklyMaxScore(currentWeek, currentClass);
+            const maxInputEl = document.getElementById('weeklyMaxQuizInput');
+            if (maxInputEl) {
+                maxInputEl.value = maxQuiz;
+                maxInputEl.disabled = !isTeacherMode;
+            }
             tbody.innerHTML = '';
 
             if (roster.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">لا توجد أسماء طلاب مسجلة.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="text-center py-8 text-slate-400">لا توجد أسماء طلاب مسجلة.</td></tr>`;
                 return;
             }
 
             const days = ['sun', 'mon', 'tue', 'wed', 'thu'];
 
             roster.forEach((name, rIdx) => {
-                const st = tracker[name] || { sun: false, mon: false, tue: false, wed: false, thu: false, prize: "" };
+                const st = tracker[name] || { sun: false, mon: false, tue: false, wed: false, thu: false, hw: false, quiz: "", prize: "" };
                 const weekStars = getStudentWeekPoints(name, currentWeek); // من 25 نجمة
                 const completedDays = days.filter(d => getStudentDayStars(name, currentWeek, d) === 5).length;
                 const rank = getStudentKnightRank(name);
+                const qPct = calcScorePercentage(st.quiz, maxQuiz);
+                const qMeta = getGradeColorMeta(qPct);
 
                 const buildDayCell = (dayKey) => {
+                    const dTracker = getDailyTracker(currentWeek, dayKey);
+                    const isAbsent = dTracker[name] && dTracker[name].att === 'absent';
                     const dStars = getStudentDayStars(name, currentWeek, dayKey);
                     const isFull = dStars === 5 || st[dayKey];
                     return `
                         <td class="p-3.5 text-center">
-                            <button type="button" onclick="toggleWeeklyDayByIndex(${rIdx}, '${dayKey}')" class="star-btn">${isFull ? '⭐' : '⚪'}</button>
-                            <div class="text-[10px] font-bold ${isFull ? 'text-emerald-400' : (dStars > 0 ? 'text-amber-300' : 'text-slate-500')}">${dStars} / 5</div>
+                            <button type="button" onclick="toggleWeeklyDayByIndex(${rIdx}, '${dayKey}')" class="star-btn">${isAbsent ? '❌' : (isFull ? '⭐' : '⚪')}</button>
+                            <div class="text-[10px] font-bold ${isAbsent ? 'text-rose-400' : (isFull ? 'text-emerald-400' : (dStars > 0 ? 'text-amber-300' : 'text-slate-500'))}">
+                                ${isAbsent ? 'غائب' : `${dStars} / 5`}
+                            </div>
                         </td>
                     `;
                 };
@@ -2996,6 +3599,20 @@
                     ${buildDayCell('wed')}
                     ${buildDayCell('thu')}
                     <td class="p-3.5 text-center">
+                        <button type="button" onclick="toggleWeeklyHomeworkByIndex(${rIdx})" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ${st.hw ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-900 text-slate-400 border-slate-700 hover:border-amber-500/40'}">
+                            ${st.hw ? '✅ تم التسليم' : '⬜ لم يُسلم'}
+                        </button>
+                    </td>
+                    <td class="p-3.5 text-center">
+                        <div class="flex flex-col items-center gap-1">
+                            <div class="flex items-center gap-1">
+                                <input type="text" value="${st.quiz !== undefined ? st.quiz : ''}" ${!isTeacherMode ? 'readonly' : ''} onchange="updateWeeklyQuizByIndex(${rIdx}, this.value)" placeholder="الدرجة" class="${qMeta.inputClass} border-2 rounded-lg px-2 py-1 font-black text-xs text-center w-16 focus:outline-none focus:border-amber-400">
+                                <span class="text-xs text-slate-400 font-bold">/ ${maxQuiz}</span>
+                            </div>
+                            ${qPct !== null ? `<span class="text-[10px] font-black px-2 py-0.5 rounded-full border ${qMeta.badgeClass}">${qMeta.dot} ${qMeta.pctText} ${qMeta.bonusStars > 0 ? '(+3⭐)' : ''}</span>` : ''}
+                        </div>
+                    </td>
+                    <td class="p-3.5 text-center">
                         <div class="font-black text-amber-400 text-lg">${weekStars} / 25 ⭐</div>
                         <div class="text-[11px] text-slate-400 font-semibold">(${completedDays} / 5 أيام مكتملة)</div>
                     </td>
@@ -3008,6 +3625,30 @@
                 `;
                 tbody.appendChild(row);
             });
+        }
+
+        function toggleWeeklyHomeworkByIndex(rIdx) {
+            if (!requireTeacherOrPrompt()) return;
+            const roster = getRoster();
+            const name = roster[rIdx];
+            if (!name) return;
+            const tracker = getWeeklyTracker(currentWeek);
+            if (!tracker[name]) tracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, hw: false, quiz: "", prize: "" };
+            tracker[name].hw = !tracker[name].hw;
+            saveWeeklyTracker(currentWeek, tracker);
+            renderTrackerTable();
+        }
+
+        function updateWeeklyQuizByIndex(rIdx, val) {
+            if (!requireTeacherOrPrompt()) return;
+            const roster = getRoster();
+            const name = roster[rIdx];
+            if (!name) return;
+            const tracker = getWeeklyTracker(currentWeek);
+            if (!tracker[name]) tracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, hw: false, quiz: "", prize: "" };
+            tracker[name].quiz = val.trim();
+            saveWeeklyTracker(currentWeek, tracker);
+            renderTrackerTable();
         }
 
         function updateTrackerPrizeByIndex(rIdx, val) {
@@ -3028,13 +3669,19 @@
             if (!name) return;
             const tracker = getWeeklyTracker(currentWeek);
             if (tracker[name]) {
-                tracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, prize: tracker[name].prize || "" };
+                tracker[name] = {
+                    sun: false, mon: false, tue: false, wed: false, thu: false,
+                    hw: tracker[name].hw || false,
+                    quiz: tracker[name].quiz || "",
+                    prize: tracker[name].prize || ""
+                };
                 saveWeeklyTracker(currentWeek, tracker);
             }
-            // تصفير النجوم اليومية الخمس لهذا الطالب في هذا الأسبوع أيضاً
+            // تصفير النجوم اليومية الخمس لهذا الطالب مع الاحتفاظ بحالة الحضور والغياب
             ['sun', 'mon', 'tue', 'wed', 'thu'].forEach(dayKey => {
                 const dailyTracker = getDailyTracker(currentWeek, dayKey);
-                dailyTracker[name] = { p1: false, p2: false, p3: false, p4: false, p5: false };
+                const prevAtt = (dailyTracker[name] && dailyTracker[name].att) ? dailyTracker[name].att : 'present';
+                dailyTracker[name] = { att: prevAtt, p1: false, p2: false, p3: false, p4: false, p5: false };
                 saveDailyTracker(currentWeek, dayKey, dailyTracker);
             });
             renderTrackerTable();
@@ -3045,14 +3692,21 @@
             if (confirm("هل أنت متأكد من مسح جميع نجوم وأيام هذا الأسبوع لجميع الطلاب؟")) {
                 const tracker = getWeeklyTracker(currentWeek);
                 Object.keys(tracker).forEach(name => {
-                    tracker[name] = { sun: false, mon: false, tue: false, wed: false, thu: false, prize: tracker[name].prize || "" };
+                    if (name === '_maxQuiz') return;
+                    tracker[name] = {
+                        sun: false, mon: false, tue: false, wed: false, thu: false,
+                        hw: tracker[name].hw || false,
+                        quiz: tracker[name].quiz || "",
+                        prize: tracker[name].prize || ""
+                    };
                 });
                 saveWeeklyTracker(currentWeek, tracker);
 
                 ['sun', 'mon', 'tue', 'wed', 'thu'].forEach(dayKey => {
                     const dailyTracker = getDailyTracker(currentWeek, dayKey);
                     Object.keys(dailyTracker).forEach(name => {
-                        dailyTracker[name] = { p1: false, p2: false, p3: false, p4: false, p5: false };
+                        const prevAtt = (dailyTracker[name] && dailyTracker[name].att) ? dailyTracker[name].att : 'present';
+                        dailyTracker[name] = { att: prevAtt, p1: false, p2: false, p3: false, p4: false, p5: false };
                     });
                     saveDailyTracker(currentWeek, dayKey, dailyTracker);
                 });
@@ -3116,17 +3770,25 @@
             if (!tbody) return;
             const roster = getRoster();
             const monthlyData = getMonthlyData();
+            const maxExam = getMonthlyMaxScore(currentMonth, currentClass);
+            const maxExamInputEl = document.getElementById('monthlyMaxExamInput');
+            if (maxExamInputEl) {
+                maxExamInputEl.value = maxExam;
+                maxExamInputEl.disabled = !isTeacherMode;
+            }
             tbody.innerHTML = '';
 
             if (roster.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-400">لا توجد أسماء طلاب مسجلة.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">لا توجد أسماء طلاب مسجلة.</td></tr>`;
                 return;
             }
 
             roster.forEach((name, rIdx) => {
-                const st = monthlyData[name] || { eval: "", prize: "" };
+                const st = monthlyData[name] || { exam: "", eval: "", prize: "" };
                 const monthStars = getStudentMonthPoints(name, currentMonth); // من 100 نجمة
                 const rank = getStudentKnightRank(name);
+                const ePct = calcScorePercentage(st.exam, maxExam);
+                const eMeta = getGradeColorMeta(ePct);
 
                 const row = document.createElement('tr');
                 row.className = "hover:bg-slate-900/40 transition";
@@ -3136,6 +3798,15 @@
                         <span class="text-[10px] text-amber-400 block font-normal">${rank.badge}</span>
                     </td>
                     <td class="p-3.5 text-center font-black text-amber-400 text-xl">${monthStars} / 100 ⭐</td>
+                    <td class="p-3.5 text-center">
+                        <div class="flex flex-col items-center gap-1">
+                            <div class="flex items-center gap-1">
+                                <input type="text" value="${st.exam !== undefined ? st.exam : ''}" ${!isTeacherMode ? 'readonly' : ''} onchange="updateMonthlyFieldByIndex(${rIdx}, 'exam', this.value)" placeholder="الدرجة" class="${eMeta.inputClass} border-2 rounded-lg px-2.5 py-1 font-black text-sm text-center w-20 focus:outline-none focus:border-amber-400">
+                                <span class="text-xs text-slate-400 font-bold">/ ${maxExam}</span>
+                            </div>
+                            ${ePct !== null ? `<span class="text-[10px] font-black px-2.5 py-0.5 rounded-full border ${eMeta.badgeClass}">${eMeta.dot} ${eMeta.pctText} ${eMeta.bonusStars > 0 ? '(+3⭐)' : ''}</span>` : ''}
+                        </div>
+                    </td>
                     <td class="p-3.5 text-center">
                         <input type="text" value="${st.eval || ''}" ${!isTeacherMode ? 'readonly' : ''} onchange="updateMonthlyFieldByIndex(${rIdx}, 'eval', this.value)" placeholder="ملاحظات وتقييم الشهر..." class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-200 text-sm text-center w-full max-w-sm focus:outline-none focus:border-amber-500">
                     </td>
@@ -3153,9 +3824,10 @@
             const name = roster[rIdx];
             if (!name) return;
             const monthlyData = getMonthlyData();
-            if (!monthlyData[name]) monthlyData[name] = { eval: "", prize: "" };
+            if (!monthlyData[name]) monthlyData[name] = { exam: "", eval: "", prize: "" };
             monthlyData[name][field] = val;
             saveMonthlyData(monthlyData);
+            renderMonthlyTable();
         }
 
         function changeTerm(t) {
@@ -3240,7 +3912,8 @@
             const studentHonors = allHonor.filter(h => h.name === studentName);
             const studentGroup = getStudentGroupName(studentName);
             const rank = getStudentKnightRank(studentName);
-            const totalStarsCount = calculateStudentTotalScore(studentName); // إجمالي النجوم الفردية الفعلية
+            const totalStarsCount = calculateStudentTotalScore(studentName);
+            const stats = getStudentAcademicStats(studentName);
 
             const honorWithPhoto = studentHonors.find(h => h.photo);
             const studentPhoto = honorWithPhoto ? honorWithPhoto.photo : '';
@@ -3255,7 +3928,7 @@
                             </div>
                             <div>
                                 <h3 class="text-2xl font-black text-white">${studentName}</h3>
-                                <p class="text-sm text-amber-400 font-semibold">فصل: ${currentClass.toUpperCase()} | المجموعة: ${studentGroup}</p>
+                                <p class="text-sm text-amber-400 font-semibold">فصل: ${getCurrentClassDisplayName()} | المجموعة: ${studentGroup}</p>
                                 <span class="inline-block mt-1 text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-3 py-0.5 rounded-full font-bold">
                                     🛡️ الرتبة الحالية: ${rank.badge}
                                 </span>
@@ -3266,14 +3939,47 @@
                         </button>
                     </div>
 
+                    <!-- بطاقات الحضور والواجبات والتقييمات واختبار الشهر -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                        <div class="bg-slate-800/90 p-3.5 rounded-xl border border-emerald-500/30 text-center">
+                            <div class="text-2xl mb-1">📋</div>
+                            <div class="text-xs text-slate-400 font-bold">الغياب والاستئذان</div>
+                            <div class="text-base font-black text-emerald-400 mt-1">غياب: ${stats.absentDays} | استئذان: ${stats.excusedDays}</div>
+                        </div>
+                        <div class="bg-slate-800/90 p-3.5 rounded-xl border border-amber-500/30 text-center">
+                            <div class="text-2xl mb-1">📓</div>
+                            <div class="text-xs text-slate-400 font-bold">الواجبات المسلمة</div>
+                            <div class="text-base font-black text-amber-300 mt-1">${stats.hwCompleted} واجب مكتمل</div>
+                        </div>
+                        <div class="bg-slate-800/90 p-3.5 rounded-xl border border-indigo-500/30 text-center">
+                            <div class="text-2xl mb-1">📝</div>
+                            <div class="text-xs text-slate-400 font-bold">متوسط التقييم الأسبوعي</div>
+                            <div class="text-base font-black text-indigo-300 mt-1">${stats.avgQuiz}</div>
+                        </div>
+                        <div class="bg-slate-800/90 p-3.5 rounded-xl border border-sky-500/30 text-center">
+                            <div class="text-2xl mb-1">📄</div>
+                            <div class="text-xs text-slate-400 font-bold">اختبار الشهر</div>
+                            <div class="text-base font-black text-sky-300 mt-1">${stats.currentMonthExam} <span class="text-[11px] text-slate-400 block">(المتوسط: ${stats.avgExam})</span></div>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 flex flex-col justify-center items-center text-center">
-                            <span class="text-3xl mb-2">⭐</span>
-                            <h4 class="text-slate-300 text-sm font-bold mb-1">إجمالي النجوم الفردية المكتسبة</h4>
-                            <div class="text-4xl font-black text-amber-400 my-2">${totalStarsCount} <span class="text-lg text-slate-300">نجمة</span></div>
-                            <p class="text-xs text-slate-400">مجموع النجوم الفردية من سجل المتابعة اليومية والأيام</p>
+                            <span class="text-3xl mb-1">⭐</span>
+                            <h4 class="text-slate-300 text-sm font-bold mb-1">إجمالي النجوم الكلي (شامل مكافآت التقييم)</h4>
+                            <div class="text-4xl font-black text-amber-400 my-1.5">${totalStarsCount} <span class="text-lg text-slate-300">نجمة</span></div>
+                            <div class="flex flex-wrap justify-center gap-2 my-2 text-xs font-bold">
+                                <span class="bg-slate-900 text-slate-300 px-3 py-1 rounded-lg border border-slate-700">
+                                    📅 نجوم الأيام: ${calculateStudentDailyStarsOnly(studentName)} ⭐
+                                </span>
+                                <span class="bg-sky-500/20 text-sky-300 px-3 py-1 rounded-lg border border-sky-400/50">
+                                    🔵 مكافأة التفوق بالتقييمات: +${stats.bonusStars} ⭐ (${stats.blueCount}×3)
+                                </span>
+                            </div>
+                            <div class="mt-1 px-3 py-1 rounded-full text-xs font-black border ${stats.overallColor.badgeClass}">
+                                مستوى التقييم العام: ${stats.overallColor.dot} ${stats.overallColor.label} ${stats.overallColor.pctText ? `(${stats.overallColor.pctText})` : ''}
+                            </div>
                         </div>
-
                         <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
                             <h4 class="text-amber-400 font-bold mb-2 flex items-center gap-2"><span>🏆</span> تكريمات لوحة الشرف (${studentHonors.length})</h4>
                             <div class="max-h-36 overflow-y-auto space-y-2">
@@ -3508,7 +4214,7 @@
         function openRosterModal() {
             if (!requireTeacherOrPrompt()) return;
             document.querySelectorAll('.currentClassNameDisplay').forEach(el => {
-                el.innerText = currentClass.toUpperCase();
+                el.innerText = getCurrentClassDisplayName();
             });
             renderRosterList();
             document.getElementById('rosterModal').classList.remove('hidden');
@@ -3682,7 +4388,7 @@
                     document.getElementById('editIndex').value = student.id;
                 }
             } else {
-                document.getElementById('modalTitle').innerText = `تكريم طالب جديد في فصل ${currentClass.toUpperCase()}`;
+                document.getElementById('modalTitle').innerText = `تكريم طالب جديد في فصل ${getCurrentClassDisplayName()}`;
                 document.getElementById('studentForm').reset();
                 document.getElementById('editIndex').value = "-1";
             }
@@ -3812,9 +4518,7 @@
         // --- 13. Initialize App ---
         function initApp() {
             renderHeader();
-            document.querySelectorAll('.currentClassNameDisplay').forEach(el => {
-                el.innerText = currentClass.toUpperCase();
-            });
+            renderClassesBar();
             renderWeekSelect();
             renderDailyWeekSelect();
             renderSummarySelect();
@@ -3908,6 +4612,7 @@
     @media print {
         body.printing-parent-cert #mainAppContainer,
         body.printing-parent-cert #parentCertModal,
+        body.printing-parent-cert #changePasswordModal,
         body.printing-parent-cert #welcomeTopStudentsModal { display: none !important; }
         body.printing-parent-cert #printableArea { display: block !important; width: 100% !important; background: #ffffff !important; }
     }
@@ -3966,9 +4671,10 @@
         const totalStars = typeof calculateStudentTotalScore === 'function' ? calculateStudentTotalScore(studentName) : 0;
         const rank = typeof getStudentKnightRank === 'function' ? getStudentKnightRank(studentName) : { title: 'فارس الحرف', badge: '⚔️ فارس الحرف' };
         const group = typeof getStudentGroupName === 'function' ? getStudentGroupName(studentName) : 'مجموعته';
-        const className = typeof currentClass !== 'undefined' ? currentClass.toUpperCase() : 'الثاني الإعدادي';
+        const className = typeof currentClass !== 'undefined' ? getCurrentClassDisplayName() : 'الثاني الإعدادي';
+        const stats = typeof getStudentAcademicStats === 'function' ? getStudentAcademicStats(studentName) : { absentDays: 0, excusedDays: 0, hwCompleted: 0, avgQuiz: 'لم يُرصد', currentMonthExam: 'لم يُرصد' };
 
-        const msg = `تحية طيبة ولي الأمر الفاضل 🌹\n\nنحيطكم علماً بمستوى ابننا/ابنتنا المميز: ${studentName} (فصل ${className})\n\n🛡️ الرتبة الحالية: ${rank.badge} (${rank.title})\n👥 المجموعة التعاونية: ${group}\n⭐ إجمالي النجوم المكتسبة (من سجل الأيام): (${totalStars} نجمة)\n\nنشكر لكم دعمكم المستمر ومتابعتكم الرائعة معنا في مادة اللغة العربية.\nمع أطيب تمنياتنا بدوام التميز والنجاح 🌟`;
+        const msg = `تحية طيبة ولي الأمر الفاضل 🌹\n\nنحيطكم علماً بمستوى ابننا/ابنتنا المميز: ${studentName} (فصل ${className})\n\n🛡️ الرتبة الحالية: ${rank.badge} (${rank.title}) | 👥 المجموعة: ${group}\n📋 الغياب: (${stats.absentDays} أيام) | 📓 الواجبات المسلمة: (${stats.hwCompleted})\n📝 متوسط التقييم الأسبوعي: (${stats.avgQuiz}) | 📄 درجة اختبار الشهر: (${stats.currentMonthExam})\n⭐ إجمالي النجوم المكتسبة: (${totalStars} نجمة)\n\nنشكر لكم دعمكم المستمر ومتابعتكم الرائعة معنا في مادة اللغة العربية.\nمع أطيب تمنياتنا بدوام التميز والنجاح 🌟`;
 
         textElem.value = msg;
     }
@@ -3992,7 +4698,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #d97706; padding-bottom: 8px; margin-bottom: 12px; font-size: 11px; font-weight: 800; color: #451a03;">
                         <div>${header.subject}</div>
                         <div style="background: #78350f; color: #fef3c7; padding: 2px 12px; border-radius: 999px;">${rank.badge}</div>
-                        <div>فصل (${currentClass.toUpperCase()})</div>
+                        <div>فصل (${getCurrentClassDisplayName()})</div>
                     </div>
                     
                     <h1 style="text-align: center; font-family: 'Aref Ruqaa', serif; font-size: 28px; color: #78350f; margin: 4px 0;">شهادة متابعة ولي الأمر</h1>
@@ -4065,6 +4771,15 @@
         let stars = 0;
         const days = ['sun', 'mon', 'tue', 'wed', 'thu'];
         targetWeeks.forEach(w => {
+            const wTracker = safeGet(`weekly_tracker_${cls}_${w}`, {}, 'object');
+            const maxQuiz = parseFloat(wTracker._maxQuiz) > 0 ? parseFloat(wTracker._maxQuiz) : 10;
+            if (wTracker[studentName]) {
+                const qPct = calcScorePercentage(wTracker[studentName].quiz, maxQuiz);
+                if (qPct !== null && qPct >= 85) {
+                    stars += 3;
+                }
+            }
+
             days.forEach(d => {
                 const dailyTracker = safeGet(`daily_tracker_${cls}_${w}_${d}`, {}, 'object');
                 const st = dailyTracker[studentName];
@@ -4077,6 +4792,28 @@
                 }
             });
         });
+
+        let targetMonths = [];
+        if (period === 'month') {
+            targetMonths = [subFilterValue || currentMonth || 'month1'];
+        } else if (period === 'term') {
+            const selectedTerm = subFilterValue || currentTerm || 'term1';
+            targetMonths = selectedTerm === 'term2' ? ['month5', 'month6', 'month7', 'month8'] : ['month1', 'month2', 'month3', 'month4'];
+        } else if (period === 'year') {
+            targetMonths = ['month1', 'month2', 'month3', 'month4', 'month5', 'month6', 'month7', 'month8'];
+        }
+
+        targetMonths.forEach(m => {
+            const mTracker = safeGet(`monthly_data_${cls}_${m}`, {}, 'object');
+            const maxExam = parseFloat(mTracker._maxExam) > 0 ? parseFloat(mTracker._maxExam) : 20;
+            if (mTracker[studentName]) {
+                const ePct = calcScorePercentage(mTracker[studentName].exam, maxExam);
+                if (ePct !== null && ePct >= 85) {
+                    stars += 3;
+                }
+            }
+        });
+
         return stars;
     }
 
@@ -4165,7 +4902,8 @@
     }
 
     function renderPodiumCards() {
-        const classesToScan = podiumScope === 'all' ? ['jade', 'crystal', 'opal'] : [currentClass];
+        const allClassesObj = typeof getClassesList === 'function' ? getClassesList() : [{id:'jade',name:'Jade'},{id:'crystal',name:'Crystal'},{id:'opal',name:'Opal'}];
+        const classesToScan = podiumScope === 'all' ? allClassesObj.map(c => c.id) : [currentClass];
         const subSelect = document.getElementById('podiumSubFilterSelect');
         const subFilterValue = subSelect ? subSelect.value : '';
 
@@ -4178,9 +4916,10 @@
 
         const subtitle = document.getElementById('podiumSubtitle');
         if (subtitle) {
+            const allNames = allClassesObj.map(c => c.name).join(' • ');
             const scopeText = podiumScope === 'all'
-                ? 'على مستوى الفصول الثلاثة (Jade • Crystal • Opal)'
-                : `في فصل (${currentClass.toUpperCase()})`;
+                ? `على مستوى جميع الفصول (${allNames})`
+                : `في فصل (${typeof getCurrentClassDisplayName === 'function' ? getCurrentClassDisplayName(currentClass) : getCurrentClassDisplayName()})`;
             subtitle.innerText = `فرسان الصدارة والأعلى حصولاً على النجوم ${scopeText} — ${periodLabels[podiumPeriod]}`;
         }
 
@@ -4189,6 +4928,7 @@
         classesToScan.forEach(cls => {
             const roster = getClassRosterByKey(cls);
             const honorNames = getClassHonorNamesByKey(cls);
+            const clsDisplayName = typeof getCurrentClassDisplayName === 'function' ? getCurrentClassDisplayName(cls) : cls.toUpperCase();
 
             roster.forEach(name => {
                 const periodScore = calculateStudentStarsByPeriod(cls, name, podiumPeriod, subFilterValue);
@@ -4197,7 +4937,7 @@
 
                 allCandidates.push({
                     name: name,
-                    className: cls.toUpperCase(),
+                    className: clsDisplayName,
                     score: periodScore,
                     totalYearScore: totalYearScore,
                     isHonored: honorNames.includes(name),
@@ -4250,7 +4990,7 @@
 
     function showWelcomeTopStudents() {
         document.querySelectorAll('.currentClassNameDisplay').forEach(el => {
-            if (typeof currentClass !== 'undefined') el.innerText = currentClass.toUpperCase();
+            if (typeof currentClass !== 'undefined') el.innerText = getCurrentClassDisplayName();
         });
 
         changePodiumScope(podiumScope);
